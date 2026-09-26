@@ -47,6 +47,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         if (!res.ok) return;
         const data = await res.json();
         setCompanyProfile(data);
+        // Update favicon to match company logo
+        if (data?.logo && data.logo.length > 1) {
+          let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
+          if (!link) {
+            link = document.createElement('link');
+            link.rel = 'icon';
+            document.head.appendChild(link);
+          }
+          link.href = data.logo;
+        }
       } catch (error) {
         console.error('Failed to fetch company profile', error);
       }

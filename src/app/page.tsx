@@ -223,6 +223,9 @@ export default async function LandingPage() {
     logo: null,
   };
 
+  // Normalize: treat empty string logo as null
+  const companyLogo = company.logo && company.logo.length > 1 ? company.logo : null;
+
   const currentYear = new Date().getFullYear();
 
   // Format nomor WhatsApp
@@ -270,10 +273,10 @@ export default async function LandingPage() {
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo & Identitas Perusahaan */}
           <Link href="/" className="flex items-center gap-3.5 group">
-            {company.logo ? (
+            {companyLogo ? (
               <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs transition group-hover:shadow-md">
                 <img
-                  src={company.logo}
+                  src={companyLogo}
                   alt={`Logo ${company.name}`}
                   className="h-full w-full object-contain p-1"
                 />
