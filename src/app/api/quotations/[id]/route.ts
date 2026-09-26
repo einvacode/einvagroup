@@ -67,12 +67,14 @@ export async function DELETE(
     const session = await getServerSession(authOptions);
     if (!session) return new NextResponse("Unauthorized", { status: 401 });
 
-    await prisma.quotation.delete({
-      where: { id },
+    await prisma.$transaction(async (tx) => {
+      await tx.quotationItem.deleteMany({ where: { quotationId: id } });
+      await tx.quotation.delete({ where: { id } });
     });
 
     return new NextResponse(null, { status: 204 });
-  } catch (error) {
-    return new NextResponse("Internal Error", { status: 500 });
+  } catch (error: any) {
+    console.error("DELETE quotation error", error);
+    return new NextResponse(error.message || "Internal Error", { status: 500 });
   }
 }

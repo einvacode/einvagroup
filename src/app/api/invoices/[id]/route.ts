@@ -64,12 +64,15 @@ export async function DELETE(
     const session = await getServerSession(authOptions);
     if (!session) return new NextResponse("Unauthorized", { status: 401 });
 
-    await prisma.invoice.delete({
-      where: { id },
+    await prisma.$transaction(async (tx) => {
+      await tx.payment.deleteMany({ where: { invoiceId: id } });
+      await tx.invoiceItem.deleteMany({ where: { invoiceId: id } });
+      await tx.invoice.delete({ where: { id } });
     });
 
     return new NextResponse(null, { status: 204 });
-  } catch (error) {
-    return new NextResponse("Internal Error", { status: 500 });
+  } catch (error: any) {
+    console.error("DELETE invoice error", error);
+    return new NextResponse(error.message || "Internal Error", { status: 500 });
   }
 }

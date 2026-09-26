@@ -67,12 +67,32 @@ export async function DELETE(
     const session = await getServerSession(authOptions);
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    await prisma.project.delete({
-      where: { id },
+    await prisma.$transaction(async (tx) => {
+      const invoices = await tx.invoice.findMany({ where: { projectId: id }, select: { id: true } });
+      const invoiceIds = invoices.map((i) => i.id);
+      if (invoiceIds.length > 0) {
+        await tx.payment.deleteMany({ where: { invoiceId: { in: invoiceIds } } });
+        await tx.invoiceItem.deleteMany({ where: { invoiceId: { in: invoiceIds } } });
+        await tx.invoice.deleteMany({ where: { id: { in: invoiceIds } } });
+      }
+
+      const quotations = await tx.quotation.findMany({ where: { projectId: id }, select: { id: true } });
+      const quotationIds = quotations.map((q) => q.id);
+      if (quotationIds.length > 0) {
+        await tx.quotationItem.deleteMany({ where: { quotationId: { in: quotationIds } } });
+        await tx.quotation.deleteMany({ where: { id: { in: quotationIds } } });
+      }
+
+      await tx.schedule.deleteMany({ where: { projectId: id } });
+      await tx.progressUpdate.deleteMany({ where: { projectId: id } });
+      await tx.expense.deleteMany({ where: { projectId: id } });
+
+      await tx.project.delete({ where: { id } });
     });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  } catch (error: any) {
+    console.error("DELETE project error", error);
+    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
   }
 }

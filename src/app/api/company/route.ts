@@ -5,25 +5,27 @@ import { z } from "zod";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
+const stringOrNull = z.string().nullable().optional();
+
 const companyProfileSchema = z.object({
-  name: z.string().min(1).default("ProjeKerja"),
-  tagline: z.string().optional().or(z.literal("")),
-  address: z.string().optional().or(z.literal("")),
-  city: z.string().optional().or(z.literal("")),
-  phone: z.string().optional().or(z.literal("")),
-  email: z.string().email().optional().or(z.literal("")),
-  website: z.string().url().optional().or(z.literal("")),
-  npwp: z.string().optional().or(z.literal("")),
-  bankName: z.string().optional().or(z.literal("")),
-  bankAccount: z.string().optional().or(z.literal("")),
-  bankHolder: z.string().optional().or(z.literal("")),
-  directorName: z.string().optional().or(z.literal("")),
-  notes: z.string().optional().or(z.literal("")),
-  logo: z.string().optional().or(z.literal("")),
-  aboutText: z.string().optional().or(z.literal("")),
-  servicesJson: z.string().optional().or(z.literal("")),
-  portfolioJson: z.string().optional().or(z.literal("")),
-  strengthsJson: z.string().optional().or(z.literal("")),
+  name: z.string().min(1).default("Einva Group"),
+  tagline: stringOrNull,
+  address: stringOrNull,
+  city: stringOrNull,
+  phone: stringOrNull,
+  email: stringOrNull,
+  website: stringOrNull,
+  npwp: stringOrNull,
+  bankName: stringOrNull,
+  bankAccount: stringOrNull,
+  bankHolder: stringOrNull,
+  directorName: stringOrNull,
+  notes: stringOrNull,
+  logo: stringOrNull,
+  aboutText: stringOrNull,
+  servicesJson: stringOrNull,
+  portfolioJson: stringOrNull,
+  strengthsJson: stringOrNull,
 });
 
 const defaultCompanyProfile = {

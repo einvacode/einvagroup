@@ -146,6 +146,7 @@ export default function CompanySettingsPage() {
   const [restoring, setRestoring] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [resettingDemo, setResettingDemo] = useState(false);
 
   // State untuk Portofolio
   const [portfolioList, setPortfolioList] = useState(defaultPortfolio);
@@ -177,7 +178,26 @@ export default function CompanySettingsPage() {
         const res = await fetch("/api/company");
         if (!res.ok) return;
         const data = await res.json();
-        setProfile({ ...defaultProfile, ...data });
+        const sanitized = {
+          ...defaultProfile,
+          ...data,
+          name: data.name || defaultProfile.name,
+          tagline: data.tagline ?? "",
+          address: data.address ?? "",
+          city: data.city ?? "",
+          phone: data.phone ?? "",
+          email: data.email ?? "",
+          website: data.website ?? "",
+          npwp: data.npwp ?? "",
+          bankName: data.bankName ?? "",
+          bankAccount: data.bankAccount ?? "",
+          bankHolder: data.bankHolder ?? "",
+          directorName: data.directorName ?? "",
+          notes: data.notes ?? "",
+          logo: data.logo ?? "",
+          aboutText: data.aboutText ?? "",
+        };
+        setProfile(sanitized);
 
         // Parse servicesJson jika ada
         if (data.servicesJson) {
@@ -218,8 +238,9 @@ export default function CompanySettingsPage() {
     setSaving(true);
     setStatusMessage(null);
 
-    const payload = customPayload || {
-      ...profile,
+    const merged = { ...profile, ...(customPayload || {}) };
+    const payload = {
+      ...merged,
       servicesJson: JSON.stringify(servicesList),
       portfolioJson: JSON.stringify(portfolioList),
     };
@@ -232,18 +253,57 @@ export default function CompanySettingsPage() {
       });
 
       if (!res.ok) {
-        throw new Error("Gagal menyimpan data ke database");
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error || "Gagal menyimpan data ke database");
       }
 
       const updated = await res.json();
       setProfile((prev) => ({ ...prev, ...updated }));
-      setStatusMessage({ type: "success", text: "Perubahan berhasil disimpan! Web portal telah diperbarui." });
+      setStatusMessage({ type: "success", text: "Perubahan profil berhasil disimpan!" });
       return true;
-    } catch (error) {
-      setStatusMessage({ type: "error", text: "Gagal menyimpan perubahan. Periksa koneksi server." });
+    } catch (error: any) {
+      setStatusMessage({ type: "error", text: error.message || "Gagal menyimpan perubahan. Periksa koneksi server." });
       return false;
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleResetDemoData = async () => {
+    const confirmation = prompt(
+      'PERINGATAN: Tindakan ini akan MENGHAPUS SEMUA data sampel (Klien, Proyek, Invoice, Penawaran, Jadwal, Keuangan).\nAkun login Admin dan Profil Perusahaan Einva Group tetap aman.\n\nKetik "HAPUS" untuk mengonfirmasi:'
+    );
+
+    if (confirmation !== "HAPUS") {
+      if (confirmation !== null) {
+        alert("Penghapusan dibatalkan (kata konfirmasi tidak cocok).");
+      }
+      return;
+    }
+
+    setResettingDemo(true);
+    setStatusMessage(null);
+
+    try {
+      const res = await fetch("/api/system/reset-demo", { method: "POST" });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Gagal membersihkan data sampel");
+      }
+
+      setStatusMessage({
+        type: "success",
+        text: "Semua data sampel berhasil dihapus! Database sekarang bersih untuk operasional riil.",
+      });
+      alert("Sukses: Seluruh data sampel berhasil dibersihkan!");
+    } catch (error: any) {
+      setStatusMessage({
+        type: "error",
+        text: error.message || "Gagal membersihkan data sampel.",
+      });
+    } finally {
+      setResettingDemo(false);
     }
   };
 
@@ -516,10 +576,27 @@ export default function CompanySettingsPage() {
                 </div>
               </div>
 
-              <label className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-bold text-white hover:bg-slate-800 transition">
-                <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
-                {uploadingLogo ? "Mengunggah..." : "Upload Logo Baru"}
-              </label>
+              <div className="flex items-center gap-2">
+                {profile.logo && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (confirm("Hapus logo perusahaan saat ini?")) {
+                        const updated = { ...profile, logo: "" };
+                        setProfile(updated);
+                        await saveProfile(updated);
+                      }
+                    }}
+                    className="rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-100 transition cursor-pointer"
+                  >
+                    Hapus Logo
+                  </button>
+                )}
+                <label className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-bold text-white hover:bg-slate-800 transition cursor-pointer">
+                  <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
+                  {uploadingLogo ? "Mengunggah..." : profile.logo ? "Ganti Logo" : "Upload Logo Baru"}
+                </label>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -695,6 +772,30 @@ export default function CompanySettingsPage() {
               >
                 <RefreshCw className="h-4 w-4" />
                 Mulai Pembaruan Sistem
+              </button>
+            </div>
+          </div>
+
+          {/* Pembersihan Data Sampel / Demo */}
+          <div className="rounded-3xl border border-rose-200 bg-rose-50/50 p-6 shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-bold text-rose-900 flex items-center gap-2">
+                  <Trash2 className="h-5 w-5 text-rose-600" />
+                  <span>Pembersihan Data Sampel / Data Eksisting (Clean Slate)</span>
+                </h2>
+                <p className="text-xs text-rose-700 mt-1 max-w-2xl leading-relaxed">
+                  Hapus seluruh data sampel/dummy bawaan (Klien, Proyek, Penawaran SPH, Invoice, Jadwal, dan Keuangan) agar database bersih dan siap digunakan untuk data operasional riil Einva Group. Akun login Admin dan Profil Perusahaan tetap aman.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleResetDemoData}
+                disabled={resettingDemo}
+                className="shrink-0 flex items-center gap-2 rounded-xl bg-rose-600 px-5 py-3 text-xs font-bold text-white shadow-md shadow-rose-500/20 hover:bg-rose-700 transition cursor-pointer disabled:opacity-50"
+              >
+                <Trash2 className="h-4 w-4" />
+                {resettingDemo ? "Sedang Membersihkan..." : "Hapus Data Sampel"}
               </button>
             </div>
           </div>
