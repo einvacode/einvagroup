@@ -268,27 +268,30 @@ export default async function LandingPage() {
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo & Identitas Perusahaan */}
           <Link href="/" className="flex items-center gap-3.5 group">
-            <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs transition group-hover:shadow-md">
-              {company.logo ? (
-                <img
-                  src={company.logo}
-                  alt={`Logo ${company.name}`}
-                  className="h-full w-full object-contain p-1"
-                />
-              ) : (
+            {company.logo ? (
+              <img
+                src={company.logo}
+                alt={`Logo ${company.name}`}
+                className="max-h-12 w-auto object-contain transition group-hover:opacity-90"
+                style={{ maxWidth: '200px' }}
+              />
+            ) : (
+              <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs transition group-hover:shadow-md">
                 <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-700 text-lg font-black text-white">
                   {company.name?.[0]?.toUpperCase() || 'E'}
                 </div>
-              )}
-            </div>
-            <div>
-              <div className="text-lg font-bold tracking-tight text-slate-900 leading-tight">
-                {company.name}
               </div>
-              <div className="text-[11px] font-medium text-slate-500 tracking-wide line-clamp-1">
-                {company.tagline || 'Solusi IT, Jaringan & Keamanan'}
+            )}
+            {!company.logo && (
+              <div>
+                <div className="text-lg font-bold tracking-tight text-slate-900 leading-tight">
+                  {company.name}
+                </div>
+                <div className="text-[11px] font-medium text-slate-500 tracking-wide line-clamp-1">
+                  {company.tagline || 'Solusi IT, Jaringan & Keamanan'}
+                </div>
               </div>
-            </div>
+            )}
           </Link>
 
           {/* Navigasi Desktop */}
