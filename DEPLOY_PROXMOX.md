@@ -156,7 +156,24 @@ Aplikasi dikelola menggunakan systemd service dengan nama `einvagroup`:
 
 ## 🔄 7. Cara Memperbarui Aplikasi (Update)
 
-Jika Anda memiliki perubahan kode atau ingin memperbarui aplikasi di kemudian hari:
+Jika Anda melakukan perubahan kode, menambah fitur, atau mengunggah berkas terbaru ke Container Proxmox, Anda dapat melakukan pembaruan dengan dua cara:
+
+### Cara A: 1-Klik Update Langsung dari Antarmuka Web (Paling Mudah)
+Anda tidak perlu lagi membuka terminal / SSH ke Proxmox:
+1. Buka aplikasi di browser dan login sebagai **Admin**.
+2. Klik tombol **"Update Aplikasi"** di pojok kanan atas bilah navigasi (Navbar), atau masuk ke menu **Pengaturan** -> kartu **"Pembaruan Aplikasi & Sinkronisasi Sistem"**.
+3. Klik tombol **"Mulai Pembaruan Sistem"**.
+4. Jendela terminal interaktif akan menampilkan proses secara realtime:
+   - 🛡️ Backup otomatis database SQLite ke `backups/`.
+   - 📦 Menarik berkas terbaru / Git pull.
+   - 🧩 Pengecekan dependensi baru (`npm install`).
+   - 🗄️ Sinkronisasi skema database Prisma (`prisma generate` & `prisma db push`).
+   - ⚡ Kompilasi build Next.js produksi (`npm run build`).
+   - 🚀 Restart service systemd `einvagroup.service` otomatis.
+5. Halaman web akan otomatis me-refresh dalam 5 detik dan aplikasi siap digunakan dengan kode terbaru!
+
+### Cara B: Melalui Terminal Console Container
+Jika Anda lebih menyukai baris perintah:
 1. Masuk ke folder aplikasi di container:
    ```bash
    cd /var/www/einvagroup
@@ -165,7 +182,7 @@ Jika Anda memiliki perubahan kode atau ingin memperbarui aplikasi di kemudian ha
    ```bash
    ./update.sh
    ```
-Skrip ini akan otomatis mem-backup database, menginstal dependensi baru, memperbarui skema Prisma, mengompilasi ulang Next.js, dan me-restart service.
+Skrip ini akan otomatis mem-backup database, menginstal dependensi baru, memperbarui skema Prisma, mengompilasi ulang Next.js, dan me-restart service `einvagroup`.
 
 ---
 

@@ -15,7 +15,9 @@ import {
   Save,
   RotateCcw,
   Sparkles,
+  RefreshCw,
 } from "lucide-react";
+import { SystemUpdateModal } from "@/components/system-update-modal";
 
 // Default Services / Layanan
 const defaultServices = [
@@ -143,6 +145,7 @@ export default function CompanySettingsPage() {
   const [statusMessage, setStatusMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [restoring, setRestoring] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
 
   // State untuk Portofolio
   const [portfolioList, setPortfolioList] = useState(defaultPortfolio);
@@ -671,6 +674,30 @@ export default function CompanySettingsPage() {
               </label>
             </div>
           </div>
+
+          {/* Pembaruan Aplikasi & Sinkronisasi Sistem */}
+          <div className="rounded-3xl border border-blue-200 bg-gradient-to-br from-blue-50/60 via-white to-cyan-50/40 p-6 shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <RefreshCw className="h-5 w-5 text-blue-600" />
+                  <span>Pembaruan Aplikasi & Sinkronisasi Sistem (1-Click Update)</span>
+                </h2>
+                <p className="text-xs text-slate-600 mt-1 max-w-2xl leading-relaxed">
+                  Jalankan proses pembaruan otomatis setelah Anda mengunggah atau memodifikasi file aplikasi pada Container Proxmox (CT) lokal.
+                  Sistem akan otomatis mencadangkan database, memperbarui dependensi, sinkronisasi skema database, melakukan build Next.js, dan me-restart service sistem.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsUpdateModalOpen(true)}
+                className="shrink-0 flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:bg-blue-700 transition cursor-pointer"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Mulai Pembaruan Sistem
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -1042,6 +1069,8 @@ export default function CompanySettingsPage() {
           </div>
         </div>
       )}
+
+      <SystemUpdateModal isOpen={isUpdateModalOpen} onClose={() => setIsUpdateModalOpen(false)} />
     </div>
   );
 }

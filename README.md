@@ -35,7 +35,23 @@ Untuk memasang aplikasi ini di Linux Container (CT) Proxmox VE (Debian / Ubuntu)
    - **Portal Karyawan (Login Internal):** `http://<IP-CONTAINER>:3000/login`
 
 📖 **Panduan lengkap langkah demi langkah dari pembuatan CT hingga konfigurasi Nginx & SSL dapat dibaca di:**
-👉 **[`DEPLOY_PROXMOX.md`](file:///C:/Users/Admin/Documents/claude/projekerja/DEPLOY_PROXMOX.md)**
+👉 **[`DEPLOY_PROXMOX.md`](file:///C:/Users/Admin/Documents/claude/einvagroup/DEPLOY_PROXMOX.md)**
+
+---
+
+### 3. Pembaruan Aplikasi 1-Klik dari Web UI (Tanpa Repot Buka Terminal)
+Setelah Anda mengunggah berkas baru atau mengubah kode di Container CT lokal, Anda tidak perlu lagi menjalankan perintah terminal secara manual:
+1. Login ke Portal Karyawan sebagai **Admin**.
+2. Klik tombol **"Update Aplikasi"** di bagian atas bilah navigasi (Navbar), atau buka menu **Pengaturan** -> kartu **"Pembaruan Aplikasi & Sinkronisasi Sistem"**.
+3. Klik tombol **"Mulai Pembaruan Sistem"**.
+4. Sistem akan otomatis menampilkan terminal interaktif yang menjalankan:
+   - Pencadangan otomatis database SQLite ke folder `backups/`.
+   - Pengecekan perubahan berkas atau git pull.
+   - Pembaruan dependensi (`npm install`).
+   - Sinkronisasi skema database (`prisma generate` & `prisma db push`).
+   - Kompilasi build produksi Next.js (`npm run build`).
+   - Me-restart service `einvagroup.service` di Container Proxmox secara otomatis.
+5. Halaman web akan otomatis memuat ulang (*auto-reload*) setelah pembaruan selesai.
 
 ---
 
@@ -62,9 +78,9 @@ Untuk memasang aplikasi ini di Linux Container (CT) Proxmox VE (Debian / Ubuntu)
 ---
 
 ## 📁 Struktur File Penting
-- **[`install.sh`](file:///C:/Users/Admin/Documents/claude/projekerja/install.sh)**: Script instalasi otomatis untuk Linux/Proxmox CT (Node.js 20 LTS, Prisma, Systemd `einvagroup.service`).
-- **[`update.sh`](file:///C:/Users/Admin/Documents/claude/projekerja/update.sh)**: Script pembaruan aplikasi dan restart service otomatis.
-- **[`DEPLOY_PROXMOX.md`](file:///C:/Users/Admin/Documents/claude/projekerja/DEPLOY_PROXMOX.md)**: Panduan lengkap setup Proxmox CT.
-- **[`start.bat`](file:///C:/Users/Admin/Documents/claude/projekerja/start.bat)**: Launcher cepat untuk Windows.
-- **[`prisma/schema.prisma`](file:///C:/Users/Admin/Documents/claude/projekerja/prisma/schema.prisma)**: Skema database Prisma.
-- **[`prisma/dev.db`](file:///C:/Users/Admin/Documents/claude/projekerja/prisma/dev.db)**: File database SQLite lokal.
+- **[`install.sh`](file:///C:/Users/Admin/Documents/claude/einvagroup/install.sh)**: Script instalasi otomatis untuk Linux/Proxmox CT (Node.js 20 LTS, Prisma, Systemd `einvagroup.service`).
+- **[`update.sh`](file:///C:/Users/Admin/Documents/claude/einvagroup/update.sh)**: Script pembaruan aplikasi via terminal bash.
+- **[`DEPLOY_PROXMOX.md`](file:///C:/Users/Admin/Documents/claude/einvagroup/DEPLOY_PROXMOX.md)**: Panduan lengkap setup Proxmox CT.
+- **[`start.bat`](file:///C:/Users/Admin/Documents/claude/einvagroup/start.bat)**: Launcher cepat untuk Windows.
+- **[`prisma/schema.prisma`](file:///C:/Users/Admin/Documents/claude/einvagroup/prisma/schema.prisma)**: Skema database Prisma.
+- **[`prisma/dev.db`](file:///C:/Users/Admin/Documents/claude/einvagroup/prisma/dev.db)**: File database SQLite lokal.
