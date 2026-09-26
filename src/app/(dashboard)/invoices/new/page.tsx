@@ -88,7 +88,9 @@ function InvoiceForm() {
       tax: useTax ? 11 : 0,
       initialPayment: safeInitialPayment,
       dueDate: new Date(dueDate).toISOString(),
-      notes: `Pembayaran dapat ditransfer ke Rekening BCA 123456789 a/n ProjeKerja Inc.\nUang muka awal: ${safeInitialPayment.toLocaleString("id-ID", { style: "currency", currency: "IDR" })}`
+      notes: safeInitialPayment > 0 
+        ? `Uang muka awal: ${safeInitialPayment.toLocaleString("id-ID", { style: "currency", currency: "IDR" })}` 
+        : ""
     };
 
     const res = await fetch("/api/invoices", {
