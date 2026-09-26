@@ -26,7 +26,10 @@ export default function PrintQuotationClient({ quotation, company }: { quotation
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: `
-        @page { margin: 0; size: auto; }
+        @page { 
+          margin: 15mm; 
+          size: A4 portrait; 
+        }
         body { 
           margin: 0; 
           padding: 0; 
@@ -38,18 +41,17 @@ export default function PrintQuotationClient({ quotation, company }: { quotation
           font-family: Arial, sans-serif;
           font-size: 11pt;
           color: #000;
-          padding: 15mm 20mm;
           line-height: 1.5;
-          max-width: 210mm; /* A4 width approx */
+          width: 100%;
+          max-width: 190mm; /* A4 width minus margins */
           margin: 0 auto;
         }
         /* Hide UI elements injected by browsers or extensions if any */
         @media screen {
-           body { background: #f1f5f9; }
+           body { background: #f1f5f9; padding: 20px 0; }
            .print-container {
                background: white;
-               margin-top: 20px;
-               margin-bottom: 20px;
+               padding: 15mm;
                box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
            }
         }
