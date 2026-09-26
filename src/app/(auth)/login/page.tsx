@@ -65,7 +65,7 @@ export default function LoginPage() {
       </Link>
       <Card className="w-full">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold text-blue-600">Masuk ke ProjeKerja</CardTitle>
+          <CardTitle className="text-2xl font-bold text-blue-600">Masuk ke Sistem</CardTitle>
           <CardDescription>
             Masukkan email dan password Anda untuk masuk
           </CardDescription>

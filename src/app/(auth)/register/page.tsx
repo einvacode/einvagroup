@@ -83,7 +83,7 @@ export default function RegisterPage() {
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-2xl font-bold text-blue-600">Daftar Akun Baru</CardTitle>
           <CardDescription>
-            Buat akun untuk mulai menggunakan ProjeKerja
+            Buat akun untuk mulai menggunakan Sistem
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit(onSubmit)}>

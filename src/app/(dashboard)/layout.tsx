@@ -125,7 +125,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold text-white">{session?.user?.name || 'Admin'}</p>
-              <p className="truncate text-xs text-slate-400">{session?.user?.email || 'admin@projekerja.id'}</p>
+              <p className="truncate text-xs text-slate-400">{session?.user?.email || 'admin@einva.id'}</p>
             </div>
           </div>
 

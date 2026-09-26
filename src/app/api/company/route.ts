@@ -8,7 +8,7 @@ import { prisma } from "@/lib/db";
 const stringOrNull = z.string().nullable().optional();
 
 const companyProfileSchema = z.object({
-  name: z.string().min(1).default("Einva Group"),
+  name: z.string().min(1).default("PT EINVA INTI DATA"),
   tagline: stringOrNull,
   address: stringOrNull,
   city: stringOrNull,
@@ -29,7 +29,7 @@ const companyProfileSchema = z.object({
 });
 
 const defaultCompanyProfile = {
-  name: "Einva Group",
+  name: "PT EINVA INTI DATA",
   tagline: "Installed Right, Serviced Better",
   address: "Gempol Rt 10 Sambirejo, Sambirejo, Sragen",
   city: "Jawa Tengah",
