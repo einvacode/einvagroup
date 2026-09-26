@@ -22,7 +22,17 @@ export default function PrintInvoiceClient({ invoice, company }: { invoice: any;
   const bankInfo = company?.bankName
     ? `Rekening Pembayaran:\n${company.bankName} - ${company.bankAccount}\na.n. ${company.bankHolder}`
     : null;
-  const info = invoice.notes || bankInfo || company?.notes;
+    
+  const cleanInvoiceNotes = invoice.notes 
+    ? invoice.notes.replace(/Pembayaran dapat ditransfer ke Rekening BCA 123456789 a\/n ProjeKerja Inc\.?\n?/gi, '').trim() 
+    : '';
+    
+  const parts = [];
+  if (cleanInvoiceNotes) parts.push(cleanInvoiceNotes);
+  if (bankInfo) parts.push(bankInfo);
+  else if (company?.notes) parts.push(company.notes);
+  
+  const info = parts.join('\n\n');
 
   return (
     <>

@@ -209,8 +209,19 @@ export default function InvoiceDetailPage() {
             const bankInfo = companyProfile?.bankName
               ? `Rekening Pembayaran:\n${companyProfile.bankName} - ${companyProfile.bankAccount}\na.n. ${companyProfile.bankHolder}`
               : null;
-            const info = invoice.notes || bankInfo || companyProfile?.notes;
+            
+            const cleanInvoiceNotes = invoice.notes 
+              ? invoice.notes.replace(/Pembayaran dapat ditransfer ke Rekening BCA 123456789 a\/n ProjeKerja Inc\.?\n?/gi, '').trim() 
+              : '';
+              
+            const parts = [];
+            if (cleanInvoiceNotes) parts.push(cleanInvoiceNotes);
+            if (bankInfo) parts.push(bankInfo);
+            else if (companyProfile?.notes) parts.push(companyProfile.notes);
+            
+            const info = parts.join('\n\n');
             if (!info) return null;
+            
             return (
               <div className="border-t pt-4 text-sm text-slate-600">
                 <p className="font-semibold text-slate-800 mb-1">Informasi Pembayaran:</p>
