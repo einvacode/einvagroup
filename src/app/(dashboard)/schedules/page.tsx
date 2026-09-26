@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -230,7 +232,7 @@ export default function SchedulesPage() {
           const totalDays = Math.max(1, differenceInDays(projectEnd, projectStart) + 1)
           
           // Generate date headers (show every few days if too long, or every day)
-          const dateHeaders = []
+          const dateHeaders: Date[] = []
           for (let i = 0; i < totalDays; i++) {
             dateHeaders.push(addDays(projectStart, i))
           }
