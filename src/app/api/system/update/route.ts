@@ -24,7 +24,7 @@ function runCmd(
 
     const proc = spawn(/*turbopackIgnore: true*/ cmd, cmdArgs, {
       cwd,
-      env: { ...process.env, CI: "true", NODE_ENV: "production" },
+      env: { ...process.env, CI: "true", NODE_ENV: "production", GIT_TERMINAL_PROMPT: "0" },
     });
 
     proc.stdout?.on("data", (chunk) => {
