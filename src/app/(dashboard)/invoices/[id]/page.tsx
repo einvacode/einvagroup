@@ -56,8 +56,6 @@ export default function InvoiceDetailPage() {
     }
   };
 
-  const handlePrint = () => window.print();
-
   if (!invoice) return (
     <div className="p-6 flex items-center justify-center h-64">
       <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-orange-500" />
@@ -79,45 +77,8 @@ export default function InvoiceDetailPage() {
     DRAFT: 'Draft', SENT: 'Terkirim', PARTIAL: 'Dibayar Sebagian', PAID: 'LUNAS', OVERDUE: 'Jatuh Tempo',
   };
 
-  // Repeat char helper for dot-matrix style separator
-  const sep = (char: string, len: number) => char.repeat(len);
-
   return (
     <>
-      {/* ===================== PRINT STYLES ===================== */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        @media print {
-          /* Hide EVERYTHING first */
-          body * { visibility: hidden !important; }
-
-          /* Then show ONLY the print area */
-          .print-area,
-          .print-area * { visibility: visible !important; }
-
-          /* Position print area to fill the whole page */
-          .print-area {
-            display: block !important;
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            height: auto !important;
-            z-index: 99999 !important;
-            background: white !important;
-            font-family: 'Courier New', Courier, monospace !important;
-            font-size: 11pt !important;
-            color: #000 !important;
-            padding: 10mm 12mm !important;
-          }
-
-          * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-          @page { margin: 0; size: A4; }
-        }
-        @media screen {
-          .print-area { display: none; }
-        }
-      `}} />
-
       {/* ===================== SCREEN UI ===================== */}
       <div className="no-print max-w-4xl mx-auto space-y-6 p-4">
         {/* Header actions */}
@@ -130,7 +91,7 @@ export default function InvoiceDetailPage() {
               {statusLabel[invoice.status] || invoice.status}
             </span>
             <button
-              onClick={handlePrint}
+              onClick={() => window.open(`/invoices/${id}/print`, '_blank')}
               className="flex items-center gap-2 bg-slate-800 text-white px-4 py-2 rounded-lg hover:bg-slate-700 text-sm font-medium"
             >
               <Printer className="h-4 w-4" /> Cetak / PDF
@@ -285,175 +246,7 @@ export default function InvoiceDetailPage() {
         </div>
       </div>
 
-      {/* ===================== DOT MATRIX PRINT AREA ===================== */}
-      <div className="print-area" style={{ fontFamily: "'Courier New', Courier, monospace", fontSize: '11pt', padding: '10mm 12mm', color: '#000', lineHeight: '1.4' }}>
-        {/* Header separator */}
-        <pre style={{ margin: 0, fontFamily: 'inherit' }}>{sep('=', 70)}</pre>
 
-        {/* Company logo + name */}
-        <div style={{ textAlign: 'center', margin: '4px 0' }}>
-          {companyProfile?.logo && (
-            <img
-              src={companyProfile.logo}
-              alt="Logo"
-              style={{ height: '48px', objectFit: 'contain', display: 'block', margin: '0 auto 4px' }}
-            />
-          )}
-          <div style={{ fontWeight: 'bold', fontSize: '14pt', letterSpacing: '2px' }}>
-            {companyProfile?.name?.toUpperCase() || 'PERUSAHAAN ANDA'}
-          </div>
-          {companyProfile?.address && <div style={{ fontSize: '10pt' }}>{companyProfile.address}</div>}
-          {(companyProfile?.phone || companyProfile?.email) && (
-            <div style={{ fontSize: '10pt' }}>
-              {companyProfile?.phone && `Telp: ${companyProfile.phone}`}
-              {companyProfile?.phone && companyProfile?.email && '  |  '}
-              {companyProfile?.email && `Email: ${companyProfile.email}`}
-            </div>
-          )}
-        </div>
-
-        <pre style={{ margin: '4px 0', fontFamily: 'inherit' }}>{sep('=', 70)}</pre>
-        <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '13pt', letterSpacing: '4px', margin: '4px 0' }}>
-          INVOICE
-        </div>
-        <pre style={{ margin: '4px 0', fontFamily: 'inherit' }}>{sep('-', 70)}</pre>
-
-        {/* Invoice meta */}
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '10pt' }}>
-          <tbody>
-            <tr>
-              <td style={{ width: '50%', verticalAlign: 'top' }}>
-                <div>Nomor  : <strong>{invoice.number}</strong></div>
-                <div>Tanggal: {new Date(invoice.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</div>
-                <div>Jth Tmp: <strong style={{ color: '#000' }}>{new Date(invoice.dueDate).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</strong></div>
-                <div>Status : <strong>[{statusLabel[invoice.status] || invoice.status}]</strong></div>
-              </td>
-              <td style={{ width: '50%', verticalAlign: 'top' }}>
-                <div><strong>TAGIHAN KEPADA:</strong></div>
-                <div>{invoice.client?.name || '-'}</div>
-                {invoice.client?.company && <div>{invoice.client.company}</div>}
-                {invoice.client?.address && <div style={{ fontSize: '9pt' }}>{invoice.client.address}</div>}
-                {invoice.client?.phone && <div>Telp: {invoice.client.phone}</div>}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        {/* Proyek */}
-        {invoice.project?.name && (
-          <div style={{ fontSize: '10pt', marginTop: '4px' }}>
-            Proyek  : {invoice.project.name}
-          </div>
-        )}
-
-        <pre style={{ margin: '6px 0', fontFamily: 'inherit' }}>{sep('=', 70)}</pre>
-
-        {/* Items header */}
-        <div style={{ display: 'flex', fontSize: '10pt', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: '2px', marginBottom: '2px' }}>
-          <span style={{ width: '4%' }}>No</span>
-          <span style={{ width: '36%' }}>Deskripsi</span>
-          <span style={{ width: '8%', textAlign: 'center' }}>Qty</span>
-          <span style={{ width: '8%', textAlign: 'center' }}>Sat</span>
-          <span style={{ width: '22%', textAlign: 'right' }}>Harga Sat.</span>
-          <span style={{ width: '22%', textAlign: 'right' }}>Jumlah</span>
-        </div>
-
-        {/* Items rows */}
-        {invoice.items?.map((item: any, idx: number) => (
-          <div key={item.id}>
-            <div style={{ display: 'flex', fontSize: '10pt', paddingTop: '2px' }}>
-              <span style={{ width: '4%' }}>{idx + 1}.</span>
-              <span style={{ width: '36%' }}>{item.name}</span>
-              <span style={{ width: '8%', textAlign: 'center' }}>{item.qty ?? item.quantity}</span>
-              <span style={{ width: '8%', textAlign: 'center' }}>{item.unit}</span>
-              <span style={{ width: '22%', textAlign: 'right' }}>{formatRupiah(item.unitPrice)}</span>
-              <span style={{ width: '22%', textAlign: 'right' }}>{formatRupiah((item.qty ?? item.quantity) * item.unitPrice)}</span>
-            </div>
-            {item.description && (
-              <div style={{ fontSize: '9pt', paddingLeft: '4%', color: '#333' }}>  ~ {item.description}</div>
-            )}
-          </div>
-        ))}
-
-        <pre style={{ margin: '6px 0', fontFamily: 'inherit' }}>{sep('-', 70)}</pre>
-
-        {/* Totals */}
-        <div style={{ textAlign: 'right', fontSize: '10pt' }}>
-          <div>Subtotal            : {formatRupiah(invoice.subtotal)}</div>
-          {invoice.discount > 0 && <div>Diskon              : -{formatRupiah(invoice.discount)}</div>}
-          {invoice.tax > 0 && <div>PPN ({invoice.tax}%)          : {formatRupiah(taxAmount)}</div>}
-        </div>
-
-        <pre style={{ margin: '2px 0', fontFamily: 'inherit' }}>{sep('=', 70)}</pre>
-
-        <div style={{ textAlign: 'right', fontSize: '12pt', fontWeight: 'bold' }}>
-          GRAND TOTAL         : {formatRupiah(invoice.total)}
-        </div>
-        <div style={{ textAlign: 'right', fontSize: '10pt' }}>
-          Sudah Dibayar       : {formatRupiah(invoice.paidAmount || 0)}
-        </div>
-
-        <pre style={{ margin: '2px 0', fontFamily: 'inherit' }}>{sep('-', 70)}</pre>
-
-        <div style={{ textAlign: 'right', fontSize: '12pt', fontWeight: 'bold' }}>
-          SISA TAGIHAN        : {formatRupiah(sisaTagihan)}
-        </div>
-
-        <pre style={{ margin: '6px 0', fontFamily: 'inherit' }}>{sep('=', 70)}</pre>
-
-        {/* Payment info / notes */}
-        {(() => {
-          const bankInfo = companyProfile?.bankName
-            ? `Rekening Pembayaran:\n${companyProfile.bankName} - ${companyProfile.bankAccount}\na.n. ${companyProfile.bankHolder}`
-            : null;
-          const info = invoice.notes || bankInfo || companyProfile?.notes;
-          if (!info) return null;
-          return (
-            <div style={{ fontSize: '9pt', marginBottom: '6px', whiteSpace: 'pre-wrap' }}>
-              <strong>Informasi Pembayaran:</strong>{'\n'}
-              {info}
-            </div>
-          );
-        })()}
-
-        {/* Payment history */}
-        {invoice.payments && invoice.payments.length > 0 && (
-          <div style={{ fontSize: '9pt', marginBottom: '6px' }}>
-            <pre style={{ margin: '2px 0', fontFamily: 'inherit' }}>{sep('-', 70)}</pre>
-            <strong>RIWAYAT PEMBAYARAN:</strong>
-            {invoice.payments.map((p: any, i: number) => (
-              <div key={p.id} style={{ display: 'flex', marginTop: '2px' }}>
-                <span style={{ width: '4%' }}>{i + 1}.</span>
-                <span style={{ width: '28%' }}>{new Date(p.date).toLocaleDateString('id-ID')}</span>
-                <span style={{ width: '20%' }}>{p.method}</span>
-                <span style={{ width: '28%', textAlign: 'right' }}>{formatRupiah(p.amount)}</span>
-                <span style={{ width: '20%', paddingLeft: '8px', color: '#333' }}>{p.note || ''}</span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Signature */}
-        <pre style={{ margin: '4px 0', fontFamily: 'inherit' }}>{sep('-', 70)}</pre>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10pt', marginTop: '8px' }}>
-          <div style={{ textAlign: 'center' }}>
-            <div>Hormat Kami,</div>
-            <div style={{ marginTop: '40px' }}>___________________</div>
-            <div>{companyProfile?.name || 'Perusahaan'}</div>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <div>Penerima,</div>
-            <div style={{ marginTop: '40px' }}>___________________</div>
-            <div>{invoice.client?.name || 'Klien'}</div>
-          </div>
-        </div>
-
-        <pre style={{ margin: '8px 0 4px', fontFamily: 'inherit' }}>{sep('=', 70)}</pre>
-        <div style={{ textAlign: 'center', fontSize: '8pt' }}>
-          Dicetak: {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-          {' | '}Terima kasih atas kepercayaan Anda.
-        </div>
-      </div>
 
       {/* ===================== PAYMENT MODAL ===================== */}
       {showPaymentModal && (
