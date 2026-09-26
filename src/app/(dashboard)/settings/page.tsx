@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Building2,
   Globe,
@@ -172,6 +173,8 @@ export default function CompanySettingsPage() {
   });
   const [isAddingService, setIsAddingService] = useState(false);
 
+  const router = useRouter();
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -260,6 +263,12 @@ export default function CompanySettingsPage() {
       const updated = await res.json();
       setProfile((prev) => ({ ...prev, ...updated }));
       setStatusMessage({ type: "success", text: "Perubahan profil berhasil disimpan!" });
+      router.refresh();
+      
+      // Dispatch custom event to notify layout
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('profile-updated'));
+      }
       return true;
     } catch (error: any) {
       setStatusMessage({ type: "error", text: error.message || "Gagal menyimpan perubahan. Periksa koneksi server." });

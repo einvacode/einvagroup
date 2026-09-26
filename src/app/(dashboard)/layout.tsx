@@ -53,6 +53,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     };
 
     fetchProfile();
+
+    const handleProfileUpdate = () => {
+      fetchProfile();
+    };
+
+    window.addEventListener('profile-updated', handleProfileUpdate);
+    return () => {
+      window.removeEventListener('profile-updated', handleProfileUpdate);
+    };
   }, []);
 
   const currentPageName = navigation.find((item) => pathname?.startsWith(item.href))?.name || 'Dashboard';

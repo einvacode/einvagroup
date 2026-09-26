@@ -101,9 +101,17 @@ export async function POST(request: Request) {
       },
     });
 
+    try {
+      const { revalidatePath } = require("next/cache");
+      revalidatePath("/", "layout");
+    } catch (err) {
+      console.warn("Failed to revalidate cache", err);
+    }
+
     return NextResponse.json(updated);
   } catch (error: any) {
     console.error("POST company profile error", error);
     return new NextResponse(error.message || "Internal Error", { status: 500 });
   }
 }
+
