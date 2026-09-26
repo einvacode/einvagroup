@@ -189,12 +189,12 @@ export default function ProjectsPage() {
                   </TableCell>
                   <TableCell className="px-6 py-4 text-right">
                     <div className="flex justify-end gap-2">
-                      <Link href={`/projects/${project.id}`}>
+                      <Link href={`/projects/${project.id}`} title="Lihat Detail">
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:bg-blue-50">
                           <Eye className="h-4 w-4" />
                         </Button>
                       </Link>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600 hover:bg-red-50" onClick={() => handleDelete(project.id)}>
+                      <Button variant="ghost" size="icon" title="Hapus Proyek" className="h-8 w-8 text-red-600 hover:bg-red-50" onClick={() => handleDelete(project.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>

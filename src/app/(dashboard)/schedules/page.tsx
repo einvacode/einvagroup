@@ -150,6 +150,30 @@ export default function SchedulesPage() {
   }
 
   // --- List View Logic ---
+  const handleDeleteSchedule = async (id: string) => {
+    if (!confirm('Hapus jadwal ini?')) return
+    const res = await fetch(`/api/schedules/${id}`, { method: 'DELETE' })
+    if (res.ok || res.status === 204) {
+      setSchedules(prev => prev.filter(s => s.id !== id))
+    } else {
+      alert('Gagal menghapus jadwal.')
+    }
+  }
+
+  const handleStatusUpdate = async (id: string, newStatus: string) => {
+    const res = await fetch(`/api/schedules/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus }),
+    })
+    if (res.ok) {
+      const updated = await res.json()
+      setSchedules(prev => prev.map(s => s.id === id ? { ...s, status: updated.status } : s))
+    } else {
+      alert('Gagal mengubah status.')
+    }
+  }
+
   const renderList = () => {
     const filtered = selectedProjectId === 'all' ? schedules : schedules.filter(s => s.projectId === selectedProjectId)
     return (
@@ -164,6 +188,7 @@ export default function SchedulesPage() {
                 <th className="px-6 py-4">Mulai</th>
                 <th className="px-6 py-4">Selesai</th>
                 <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4 text-right">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -175,15 +200,29 @@ export default function SchedulesPage() {
                   <td className="px-6 py-4 text-slate-600">{formatDate(schedule.startDate)}</td>
                   <td className="px-6 py-4 text-slate-600">{formatDate(schedule.endDate)}</td>
                   <td className="px-6 py-4">
-                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold text-white ${statusColors[schedule.status] || 'bg-slate-500'}`}>
-                      {statusLabels[schedule.status] || schedule.status}
-                    </span>
+                    <select
+                      value={schedule.status}
+                      onChange={(e) => handleStatusUpdate(schedule.id, e.target.value)}
+                      className={`rounded-full px-2.5 py-1 text-[11px] font-bold text-white border-0 outline-none cursor-pointer ${statusColors[schedule.status] || 'bg-slate-500'}`}
+                    >
+                      <option value="PENDING" className="text-slate-900 bg-white">Menunggu</option>
+                      <option value="IN_PROGRESS" className="text-slate-900 bg-white">Proses</option>
+                      <option value="COMPLETED" className="text-slate-900 bg-white">Selesai</option>
+                    </select>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <button
+                      onClick={() => handleDeleteSchedule(schedule.id)}
+                      className="inline-flex items-center gap-1 rounded-md border border-red-200 bg-red-50 px-2 py-1.5 text-[11px] font-medium text-red-600 hover:bg-red-100"
+                    >
+                      Hapus
+                    </button>
                   </td>
                 </tr>
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
+                  <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
                     Tidak ada jadwal untuk proyek ini.
                   </td>
                 </tr>
@@ -276,15 +315,15 @@ export default function SchedulesPage() {
                       const widthPercent = (Math.max(1, differenceInDays(sEnd, sStart) + 1) / totalDays) * 100
 
                       return (
-                        <div key={schedule.id} className="flex items-center group">
-                          <div className="w-1/3 shrink-0 pr-4">
+                        <div key={schedule.id} className="flex items-center group gap-2">
+                          <div className="w-[28%] shrink-0 pr-2 flex flex-col">
                             <div className="text-sm font-semibold text-slate-800 truncate" title={schedule.name}>{schedule.name}</div>
                             <div className="text-[11px] text-slate-500 truncate">
                               PIC: {schedule.assignee?.name || '-'} • {format(sStart, 'dd/MM')} - {format(sEnd, 'dd/MM')}
                             </div>
                           </div>
                           
-                          <div className="w-2/3 relative h-8 bg-slate-50 rounded-lg border border-slate-100">
+                          <div className="w-[55%] relative h-8 bg-slate-50 rounded-lg border border-slate-100">
                             {/* Grid lines background */}
                             <div className="absolute inset-0 flex">
                               {dateHeaders.map((_, idx) => (
@@ -306,6 +345,23 @@ export default function SchedulesPage() {
                                 </span>
                               </div>
                             </div>
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex items-center gap-1 shrink-0 no-print">
+                            <select
+                              value={schedule.status}
+                              onChange={(e) => handleStatusUpdate(schedule.id, e.target.value)}
+                              className={`rounded-full px-2 py-0.5 text-[10px] font-bold text-white border-0 outline-none cursor-pointer ${statusColors[schedule.status] || 'bg-slate-500'}`}
+                            >
+                              <option value="PENDING" className="text-slate-900 bg-white">Menunggu</option>
+                              <option value="IN_PROGRESS" className="text-slate-900 bg-white">Proses</option>
+                              <option value="COMPLETED" className="text-slate-900 bg-white">Selesai</option>
+                            </select>
+                            <button
+                              onClick={() => handleDeleteSchedule(schedule.id)}
+                              className="rounded border border-red-200 bg-red-50 px-1.5 py-0.5 text-[10px] text-red-600 hover:bg-red-100"
+                            >✕</button>
                           </div>
                         </div>
                       )
