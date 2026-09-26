@@ -87,19 +87,31 @@ export default function InvoiceDetailPage() {
       {/* ===================== PRINT STYLES ===================== */}
       <style dangerouslySetInnerHTML={{ __html: `
         @media print {
-          body { margin: 0; padding: 0; background: white; }
-          .no-print { display: none !important; }
+          /* Hide EVERYTHING first */
+          body * { visibility: hidden !important; }
+
+          /* Then show ONLY the print area */
+          .print-area,
+          .print-area * { visibility: visible !important; }
+
+          /* Position print area to fill the whole page */
           .print-area {
             display: block !important;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%;
-            font-family: 'Courier New', Courier, monospace !important;
-            font-size: 11pt;
-            color: #000 !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: auto !important;
+            z-index: 99999 !important;
             background: white !important;
+            font-family: 'Courier New', Courier, monospace !important;
+            font-size: 11pt !important;
+            color: #000 !important;
+            padding: 10mm 12mm !important;
           }
+
           * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          @page { margin: 0; size: A4; }
         }
         @media screen {
           .print-area { display: none; }
@@ -271,8 +283,15 @@ export default function InvoiceDetailPage() {
         {/* Header separator */}
         <pre style={{ margin: 0, fontFamily: 'inherit' }}>{sep('=', 70)}</pre>
 
-        {/* Company */}
+        {/* Company logo + name */}
         <div style={{ textAlign: 'center', margin: '4px 0' }}>
+          {companyProfile?.logo && (
+            <img
+              src={companyProfile.logo}
+              alt="Logo"
+              style={{ height: '48px', objectFit: 'contain', display: 'block', margin: '0 auto 4px' }}
+            />
+          )}
           <div style={{ fontWeight: 'bold', fontSize: '14pt', letterSpacing: '2px' }}>
             {companyProfile?.name?.toUpperCase() || 'PERUSAHAAN ANDA'}
           </div>
