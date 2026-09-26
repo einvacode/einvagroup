@@ -157,16 +157,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
 
             <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setUpdateModalOpen(true)}
-                title="Pembaruan Aplikasi & Sinkronisasi Sistem"
-                className="flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50/80 px-3 py-2 text-xs font-semibold text-blue-700 transition hover:bg-blue-100 hover:border-blue-300 shadow-xs"
-              >
-                <RefreshCw className="h-3.5 w-3.5 text-blue-600" />
-                <span className="hidden sm:inline">Update Aplikasi</span>
-              </button>
-
               <div className="hidden items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-500 sm:flex">
                 <Search className="h-4 w-4" />
                 <input

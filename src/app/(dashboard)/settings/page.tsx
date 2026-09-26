@@ -785,29 +785,6 @@ export default function CompanySettingsPage() {
             </div>
           </div>
 
-          {/* Pembersihan Data Sampel / Demo */}
-          <div className="rounded-3xl border border-rose-200 bg-rose-50/50 p-6 shadow-xs">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <h2 className="text-lg font-bold text-rose-900 flex items-center gap-2">
-                  <Trash2 className="h-5 w-5 text-rose-600" />
-                  <span>Pembersihan Data Sampel / Data Eksisting (Clean Slate)</span>
-                </h2>
-                <p className="text-xs text-rose-700 mt-1 max-w-2xl leading-relaxed">
-                  Hapus seluruh data sampel/dummy bawaan (Klien, Proyek, Penawaran SPH, Invoice, Jadwal, dan Keuangan) agar database bersih dan siap digunakan untuk data operasional riil Einva Group. Akun login Admin dan Profil Perusahaan tetap aman.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={handleResetDemoData}
-                disabled={resettingDemo}
-                className="shrink-0 flex items-center gap-2 rounded-xl bg-rose-600 px-5 py-3 text-xs font-bold text-white shadow-md shadow-rose-500/20 hover:bg-rose-700 transition cursor-pointer disabled:opacity-50"
-              >
-                <Trash2 className="h-4 w-4" />
-                {resettingDemo ? "Sedang Membersihkan..." : "Hapus Data Sampel"}
-              </button>
-            </div>
-          </div>
         </div>
       )}
 
