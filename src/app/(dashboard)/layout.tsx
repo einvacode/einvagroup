@@ -78,22 +78,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         }`}
       >
         <div className="flex h-20 items-center justify-between border-b border-slate-800 px-6">
-            <Link href="/dashboard" className="flex items-center gap-3">
-              {companyProfile?.logo ? (
-                <img src={companyProfile.logo} alt="Logo perusahaan" className="max-h-10 w-auto object-contain transition-opacity hover:opacity-90" style={{ maxWidth: '180px' }} />
-              ) : (
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-700 bg-gradient-to-br from-blue-500 to-cyan-400 shadow-lg shadow-blue-500/10 text-lg font-bold text-white">
-                  {companyProfile?.name?.[0]?.toUpperCase() || 'E'}
-                </div>
-              )}
-              {!companyProfile?.logo && (
-                <div className="flex flex-col">
-                  <span className="text-sm font-bold tracking-wide text-white line-clamp-1">{companyProfile?.name || 'Sistem'}</span>
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Dasbor Admin</span>
-                </div>
-              )}
-            </Link>
-          </div>
+          <Link href="/dashboard" className="flex items-center gap-3">
+            {companyProfile?.logo ? (
+              <img
+                src={companyProfile.logo}
+                alt="Logo perusahaan"
+                className="max-h-10 w-auto object-contain"
+                style={{ maxWidth: '160px' }}
+              />
+            ) : (
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-700 bg-gradient-to-br from-blue-500 to-cyan-400 shadow-lg shadow-blue-500/10 text-lg font-bold text-white">
+                {companyProfile?.name?.[0]?.toUpperCase() || 'E'}
+              </div>
+            )}
+            {!companyProfile?.logo && (
+              <div className="flex flex-col">
+                <span className="text-sm font-bold tracking-wide text-white line-clamp-1">{companyProfile?.name || 'PT EINVA INTI DATA'}</span>
+                <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Dasbor Admin</span>
+              </div>
+            )}
+          </Link>
+        </div>
 
         <nav className="flex-1 space-y-2 overflow-y-auto px-4 py-5">
           {navigation.map((item) => {
