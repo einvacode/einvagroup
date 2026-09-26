@@ -108,16 +108,21 @@ export default function NewProjectPage() {
       if (res.ok) {
         const data = await res.json();
         setClients([data, ...clients]);
-        form.setValue("clientId", data.id);
+        form.setValue("clientId", data.id, { shouldValidate: true, shouldDirty: true });
         setClientModalOpen(false);
         setNewClientName("");
         setNewClientCompany("");
         setNewClientEmail("");
         setNewClientPhone("");
         setNewClientAddress("");
+        alert("Klien berhasil ditambahkan!");
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || "Gagal menambahkan klien. Cek kembali isian Anda.");
       }
     } catch (error) {
       console.error("Error creating client", error);
+      alert("Terjadi kesalahan jaringan saat menambahkan klien.");
     } finally {
       setClientCreating(false);
     }

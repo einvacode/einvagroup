@@ -179,7 +179,14 @@ export default function ProjectDetailPage() {
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Total Invoice</CardTitle>
+                <div className="flex justify-between items-start">
+                  <CardTitle className="text-lg">Total Invoice</CardTitle>
+                  <Link href={`/invoices/new?projectId=${project.id}`}>
+                    <Button size="sm" variant="outline" className="h-7 text-xs border-blue-200 text-blue-600 hover:bg-blue-50">
+                      <Plus className="h-3 w-3 mr-1" /> Buat
+                    </Button>
+                  </Link>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{formatCurrency(totalInvoices)}</div>

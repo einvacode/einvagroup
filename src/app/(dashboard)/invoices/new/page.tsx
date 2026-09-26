@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
-export default function NewInvoicePage() {
+function InvoiceForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  
   const [projects, setProjects] = useState<any[]>([]);
   const [clients, setClients] = useState<any[]>([]);
   const [items, setItems] = useState([{ name: "", description: "", quantity: 1, unit: "Unit", unitPrice: 0 }]);
@@ -12,7 +14,8 @@ export default function NewInvoicePage() {
   const [useTax, setUseTax] = useState(false);
   const [initialPayment, setInitialPayment] = useState(0);
   const [dueDate, setDueDate] = useState("");
-  const [projectId, setProjectId] = useState("");
+  
+  const [projectId, setProjectId] = useState(searchParams.get("projectId") || "");
   const [clientId, setClientId] = useState("");
 
   useEffect(() => {
@@ -203,5 +206,13 @@ export default function NewInvoicePage() {
         </div>
       </form>
     </div>
+  );
+}
+
+export default function NewInvoicePage() {
+  return (
+    <Suspense fallback={<div>Memuat form...</div>}>
+      <InvoiceForm />
+    </Suspense>
   );
 }
