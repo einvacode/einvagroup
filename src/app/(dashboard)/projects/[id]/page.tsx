@@ -13,6 +13,10 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function ProjectDetailPage() {
   const params = useParams();
@@ -30,6 +34,13 @@ export default function ProjectDetailPage() {
     note: "",
   });
   const [savingExpense, setSavingExpense] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [progressDialogOpen, setProgressDialogOpen] = useState(false);
+  const [progressForm, setProgressForm] = useState({ percentage: 0, note: "" });
+  const [editForm, setEditForm] = useState<any>({});
+  const [savingProgress, setSavingProgress] = useState(false);
+  const [savingEdit, setSavingEdit] = useState(false);
+
 
   const fetchProject = async () => {
     try {
@@ -48,6 +59,71 @@ export default function ProjectDetailPage() {
   useEffect(() => {
     if (projectId) fetchProject();
   }, [projectId, router]);
+
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingEdit(true);
+    try {
+      const res = await fetch(`/api/projects/${projectId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: editForm.name,
+          location: editForm.location,
+          budget: Number(editForm.budget || 0),
+          status: editForm.status,
+          type: editForm.type,
+          startDate: editForm.startDate,
+          endDate: editForm.endDate,
+        }),
+      });
+      if (!res.ok) throw new Error("Gagal menyimpan");
+      setEditDialogOpen(false);
+      await fetchProject();
+    } catch (error) {
+      alert("Gagal mengupdate proyek");
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  const handleProgressSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingProgress(true);
+    try {
+      const res = await fetch("/api/progress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          projectId,
+          percentage: Number(progressForm.percentage),
+          note: progressForm.note,
+        }),
+      });
+      if (!res.ok) throw new Error("Gagal menyimpan progress");
+      setProgressDialogOpen(false);
+      setProgressForm({ percentage: 0, note: "" });
+      await fetchProject();
+    } catch (error) {
+      alert("Gagal mengupdate progress");
+    } finally {
+      setSavingProgress(false);
+    }
+  };
+
+  const openEditDialog = () => {
+    setEditForm({
+      name: project.name || "",
+      location: project.location || "",
+      budget: project.budget || 0,
+      status: project.status || "Planned",
+      type: project.type || "Instalasi",
+      startDate: project.startDate ? new Date(project.startDate).toISOString().slice(0, 10) : "",
+      endDate: project.endDate ? new Date(project.endDate).toISOString().slice(0, 10) : "",
+    });
+    setEditDialogOpen(true);
+  };
 
   const handleExpenseSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -123,7 +199,8 @@ export default function ProjectDetailPage() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={openEditDialog}>Edit Proyek</Button>
           <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100 border-0">{project.status}</Badge>
           <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100 border-0">{project.type}</Badge>
         </div>
@@ -240,10 +317,25 @@ export default function ProjectDetailPage() {
                 <CardTitle>Update Progress</CardTitle>
                 <CardDescription>Timeline pengerjaan proyek.</CardDescription>
               </div>
-              <Button size="sm" className="bg-blue-600"><Plus className="h-4 w-4 mr-2" /> Update Progress</Button>
+              <Button size="sm" className="bg-blue-600" onClick={() => { setProgressForm({ percentage: project.progress || 0, note: "" }); setProgressDialogOpen(true); }}><Plus className="h-4 w-4 mr-2" /> Update Progress</Button>
             </CardHeader>
             <CardContent>
-               <p className="text-sm text-gray-500">Belum ada pembaruan progress.</p>
+               {project.progressUpdates?.length > 0 ? (
+                <div className="space-y-4">
+                  {project.progressUpdates.map((update: any) => (
+                    <div key={update.id} className="border-l-2 border-blue-500 pl-4 py-2">
+                      <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
+                        <Clock className="h-3 w-3" />
+                        <span>{format(new Date(update.createdAt), "dd MMM yyyy HH:mm", { locale: id })}</span>
+                        <span className="font-semibold text-blue-600 ml-2">{update.percentage}%</span>
+                      </div>
+                      <p className="text-gray-800">{update.note || "Tidak ada catatan."}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500">Belum ada pembaruan progress.</p>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
