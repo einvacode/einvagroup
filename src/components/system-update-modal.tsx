@@ -63,6 +63,12 @@ export function SystemUpdateModal({ isOpen, onClose }: SystemUpdateModalProps) {
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Sesi login Anda telah kedaluwarsa atau belum login. Silakan login kembali sebagai Admin.");
+        }
+        if (response.status === 403) {
+          throw new Error("Akses ditolak: Hanya akun Administrator yang berhak melakukan pembaruan sistem.");
+        }
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || `Server merespon kode ${response.status}`);
       }

@@ -24,7 +24,13 @@ function runCmd(
 
     const proc = spawn(/*turbopackIgnore: true*/ cmd, cmdArgs, {
       cwd,
-      env: { ...process.env, CI: "true", NODE_ENV: "production", GIT_TERMINAL_PROMPT: "0" },
+      env: {
+        ...process.env,
+        CI: "true",
+        NODE_ENV: "production",
+        GIT_TERMINAL_PROMPT: "0",
+        NODE_OPTIONS: process.env.NODE_OPTIONS || "--max-old-space-size=2048",
+      },
     });
 
     proc.stdout?.on("data", (chunk) => {
@@ -51,10 +57,13 @@ export async function POST(request: Request) {
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: "Sesi login Anda telah berakhir. Harap login kembali sebagai Administrator." }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     }
 
     // Hanya ADMIN yang berhak melakukan update sistem
