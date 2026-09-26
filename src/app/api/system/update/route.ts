@@ -137,21 +137,32 @@ export async function POST(request: Request) {
           }
 
           // 5. Build Next.js (npm run build)
-          send({ type: "step", step: 5, message: "Melakukan build produksi Next.js (npm run build)..." });
-          const buildRes = await runCmd("npm", ["run", "build"], rootDir, (output) => {
-            send({ type: "log", message: output });
-          });
+          send({ type: "step", step: 5, message: "Kompilasi dan finalisasi pembaruan..." });
+          const isDev = process.env.NODE_ENV === "development";
 
-          if (buildRes.code !== 0) {
+          if (isDev) {
             send({
-              type: "error",
-              message: "Kompilasi build Next.js gagal. Silakan periksa log di atas.",
+              type: "log",
+              message: "ℹ Server berjalan dalam mode pengembang (Dev Server). Build produksi dilewati agar Turbopack tetap aktif lancar (Fast Refresh otomatis memuat perubahan kode).\n",
             });
-            controller.close();
-            return;
-          }
+            send({ type: "log", message: "✔ Pembaruan berkas dan database selesai 100%!\n" });
+          } else {
+            send({ type: "log", message: "Menjalankan build produksi Next.js (npm run build)...\n" });
+            const buildRes = await runCmd("npm", ["run", "build"], rootDir, (output) => {
+              send({ type: "log", message: output });
+            });
 
-          send({ type: "log", message: "✔ Kompilasi build Next.js berhasil 100%!\n" });
+            if (buildRes.code !== 0) {
+              send({
+                type: "error",
+                message: "Kompilasi build Next.js gagal. Silakan periksa log di atas.",
+              });
+              controller.close();
+              return;
+            }
+
+            send({ type: "log", message: "✔ Kompilasi build Next.js berhasil 100%!\n" });
+          }
 
           // 6. Restart Service (jika di Linux / Systemd)
           if (process.platform === "linux") {
