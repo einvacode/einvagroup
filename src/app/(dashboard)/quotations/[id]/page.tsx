@@ -25,7 +25,7 @@ export default function QuotationDetailPage() {
 
   const handlePrint = () => {
     if (typeof window !== "undefined") {
-      window.print();
+      window.open(`/quotations/${id}/print`, '_blank');
     }
   };
 
