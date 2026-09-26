@@ -122,7 +122,7 @@ export async function POST(request: Request) {
 
           // 3. Install Dependensi (npm install)
           send({ type: "step", step: 3, message: "Memeriksa dan memperbarui dependensi (npm install)..." });
-          const npmRes = await runCmd("npm", ["install", "--prefer-offline"], rootDir, (output) => {
+          const npmRes = await runCmd("npm", ["install", "--prefer-offline", "--include=dev"], rootDir, (output) => {
             send({ type: "log", message: output });
           });
           if (npmRes.code !== 0) {
