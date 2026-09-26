@@ -1,5 +1,4 @@
 import * as React from "react"
-
 import { cn } from "@/lib/utils"
 
 interface DialogProps {
@@ -8,12 +7,21 @@ interface DialogProps {
   children?: React.ReactNode
 }
 
-export function Dialog({ open, children }: DialogProps) {
-  if (!open) return null
-  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">{children}</div>
+const DialogContext = React.createContext<{
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}>({});
+
+export function Dialog({ open, onOpenChange, children }: DialogProps) {
+  return (
+    <DialogContext.Provider value={{ open, onOpenChange }}>
+      {children}
+    </DialogContext.Provider>
+  )
 }
 
 export function DialogTrigger({ children, asChild, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement> & { asChild?: boolean }) {
+  const context = React.useContext(DialogContext)
   if (asChild && React.isValidElement(children)) {
     const child = children as React.ReactElement<{ onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void }>
     return React.cloneElement(child, {
@@ -21,17 +29,25 @@ export function DialogTrigger({ children, asChild, ...props }: React.ButtonHTMLA
       onClick: (event: React.MouseEvent<HTMLButtonElement>) => {
         child.props.onClick?.(event)
         props.onClick?.(event)
+        context.onOpenChange?.(true)
       },
     })
   }
-
-  return <button type="button" {...props}>{children}</button>
+  return <button type="button" {...props} onClick={(e) => {
+    props.onClick?.(e)
+    context.onOpenChange?.(true)
+  }}>{children}</button>
 }
 
 export function DialogContent({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  const context = React.useContext(DialogContext)
+  if (!context.open) return null
   return (
-    <div role="dialog" aria-modal="true" className={cn("w-full max-w-lg rounded-xl border border-slate-200 bg-white p-6 shadow-xl", className)} {...props}>
-      {children}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
+      <div role="dialog" aria-modal="true" className={cn("w-full max-w-lg rounded-xl border border-slate-200 bg-white p-6 shadow-xl relative", className)} {...props}>
+        <button onClick={() => context.onOpenChange?.(false)} className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 font-bold">✕</button>
+        {children}
+      </div>
     </div>
   )
 }
