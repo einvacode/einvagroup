@@ -70,9 +70,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       >
         <div className="flex h-20 items-center justify-between border-b border-slate-800 px-6">
           <Link href="/dashboard" className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-slate-800 shadow-lg shadow-blue-500/20">
+            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl border border-slate-700 bg-white shadow-lg shadow-blue-500/10">
               {companyProfile?.logo ? (
-                <img src={companyProfile.logo} alt="Logo perusahaan" className="h-full w-full object-cover" />
+                <img src={companyProfile.logo} alt="Logo perusahaan" className="h-full w-full object-contain p-1" />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-500 to-cyan-400 text-lg font-bold text-white">
                   {companyProfile?.name?.[0]?.toUpperCase() || 'E'}
