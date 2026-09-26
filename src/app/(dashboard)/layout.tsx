@@ -20,6 +20,7 @@ import {
   Wallet,
 } from 'lucide-react';
 import { SystemUpdateModal } from '@/components/system-update-modal';
+import { CompanyLogo } from '@/components/company-logo';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -47,16 +48,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         if (!res.ok) return;
         const data = await res.json();
         setCompanyProfile(data);
-        // Update favicon to match company logo
-        if (data?.logo && data.logo.length > 1) {
-          let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
-          if (!link) {
-            link = document.createElement('link');
-            link.rel = 'icon';
-            document.head.appendChild(link);
-          }
-          link.href = data.logo;
-        }
       } catch (error) {
         console.error('Failed to fetch company profile', error);
       }
@@ -89,15 +80,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       >
         <div className="flex h-20 items-center justify-between border-b border-slate-800 px-6">
           <Link href="/dashboard" className="flex items-center gap-3">
-            {companyProfile?.logo ? (
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-700 bg-white shadow-lg shadow-blue-500/10">
-                <img src={companyProfile.logo} alt="Logo perusahaan" className="h-full w-full object-contain p-1" />
-              </div>
-            ) : (
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-700 bg-gradient-to-br from-blue-500 to-cyan-400 shadow-lg shadow-blue-500/10 text-lg font-bold text-white">
-                {companyProfile?.name?.[0]?.toUpperCase() || 'E'}
-              </div>
-            )}
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-700 bg-white shadow-lg shadow-blue-500/10">
+              <CompanyLogo
+                src={companyProfile?.logo || null}
+                name={companyProfile?.name || 'Sistem'}
+                className="h-full w-full object-contain p-1"
+                fallbackClassName="h-full w-full text-lg"
+              />
+            </div>
             <div className="flex flex-col">
               <span className="text-sm font-bold tracking-wide text-white line-clamp-1">{companyProfile?.name || 'PT EINVA INTI DATA'}</span>
               <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Dasbor Admin</span>

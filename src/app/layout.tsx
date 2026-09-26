@@ -23,7 +23,6 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `${name} - Solusi IT, Jaringan & Keamanan`,
     description: `Platform resmi ${name} untuk profil perusahaan, portofolio pekerjaan instalasi teknologi, serta manajemen operasional internal.`,
-    icons: logo ? { icon: logo, apple: logo } : undefined,
   };
 }
 
