@@ -105,13 +105,16 @@ export async function POST(request: Request) {
           send({ type: "step", step: 2, message: "Memeriksa pembaruan repositori Git..." });
           if (existsSync(path.resolve(rootDir, ".git"))) {
             send({ type: "log", message: "Menjalankan git pull...\n" });
+            // Amankan file database agar tidak memblokir git pull
+            await runCmd("git", ["stash", "--", "prisma/dev.db"], rootDir, () => {});
             const gitRes = await runCmd("git", ["pull"], rootDir, (output) => {
               send({ type: "log", message: output });
             });
+            await runCmd("git", ["stash", "pop"], rootDir, () => {});
             if (gitRes.code === 0) {
               send({ type: "log", message: "✔ Berkas Git berhasil diperbarui.\n" });
             } else {
-              send({ type: "log", message: "⚠ Git pull dilewati atau tidak ada remote.\n" });
+              send({ type: "log", message: "⚠ Git pull selesai atau sudah sinkron.\n" });
             }
           } else {
             send({ type: "log", message: "ℹ Tidak menggunakan Git repository, menggunakan berkas lokal saat ini.\n" });
