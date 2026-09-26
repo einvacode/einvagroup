@@ -1,0 +1,211 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("STAFF") // ADMIN, MANAGER, STAFF
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projects        Project[]
+  schedules       Schedule[]
+  progressUpdates ProgressUpdate[]
+}
+
+model Client {
+  id        String   @id @default(cuid())
+  name      String
+  company   String?
+  email     String?
+  phone     String?
+  address   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projects   Project[]
+  quotations Quotation[]
+  invoices   Invoice[]
+}
+
+model CompanyProfile {
+  id          String   @id @default(cuid())
+  name        String   @default("ProjeKerja")
+  tagline     String?
+  address     String?
+  city        String?
+  phone       String?
+  email       String?
+  website     String?
+  npwp        String?
+  bankName    String?
+  bankAccount String?
+  bankHolder  String?
+  directorName String?
+  notes       String?
+  logo        String?
+  aboutText   String?
+  servicesJson String?
+  portfolioJson String?
+  strengthsJson String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  name        String
+  clientId    String
+  type        String   // CCTV, JARINGAN, LISTRIK, LAINNYA
+  description String?
+  location    String?
+  budget      Float    @default(0)
+  status      String   @default("PLANNING") // PLANNING, IN_PROGRESS, ON_HOLD, COMPLETED, CANCELLED
+  progress    Int      @default(0) // 0-100
+  startDate   DateTime?
+  endDate     DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      String
+
+  client          Client           @relation(fields: [clientId], references: [id])
+  user            User             @relation(fields: [userId], references: [id])
+  quotations      Quotation[]
+  invoices        Invoice[]
+  schedules       Schedule[]
+  progressUpdates ProgressUpdate[]
+  expenses        Expense[]
+}
+
+model Quotation {
+  id          String   @id @default(cuid())
+  number      String   @unique
+  projectId   String
+  clientId    String
+  subtotal    Float    @default(0)
+  discount    Float    @default(0)
+  tax         Float    @default(0)
+  total       Float    @default(0)
+  status      String   @default("DRAFT") // DRAFT, SENT, ACCEPTED, REJECTED
+  validUntil  DateTime?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project  Project         @relation(fields: [projectId], references: [id])
+  client   Client          @relation(fields: [clientId], references: [id])
+  items    QuotationItem[]
+  invoices Invoice[]
+}
+
+model QuotationItem {
+  id          String @id @default(cuid())
+  quotationId String
+  name        String
+  description String?
+  qty         Float
+  unit        String @default("Unit") // Unit, Meter, Set, dll
+  unitPrice   Float
+  total       Float
+
+  quotation Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+}
+
+model Invoice {
+  id          String   @id @default(cuid())
+  number      String   @unique
+  projectId   String
+  clientId    String
+  quotationId String?
+  subtotal    Float    @default(0)
+  tax         Float    @default(0)
+  total       Float    @default(0)
+  paidAmount  Float    @default(0)
+  status      String   @default("DRAFT") // DRAFT, SENT, PARTIAL, PAID, OVERDUE
+  dueDate     DateTime?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project   Project       @relation(fields: [projectId], references: [id])
+  client    Client        @relation(fields: [clientId], references: [id])
+  quotation Quotation?    @relation(fields: [quotationId], references: [id])
+  items     InvoiceItem[]
+  payments  Payment[]
+}
+
+model InvoiceItem {
+  id          String @id @default(cuid())
+  invoiceId   String
+  name        String
+  description String?
+  qty         Float
+  unit        String @default("Unit")
+  unitPrice   Float
+  total       Float
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
+
+model Payment {
+  id        String   @id @default(cuid())
+  invoiceId String
+  amount    Float
+  date      DateTime @default(now())
+  method    String   @default("TRANSFER") // TRANSFER, CASH, CHECK
+  note      String?
+  createdAt DateTime @default(now())
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
+
+model Schedule {
+  id         String   @id @default(cuid())
+  projectId  String
+  name       String
+  startDate  DateTime
+  endDate    DateTime
+  assigneeId String?
+  status     String   @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED
+  notes      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  project  Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignee User?   @relation(fields: [assigneeId], references: [id])
+}
+
+model ProgressUpdate {
+  id         String   @id @default(cuid())
+  projectId  String
+  userId     String
+  percentage Int
+  note       String?
+  photos     String?  // JSON array of photo URLs
+  createdAt  DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id])
+}
+
+model Expense {
+  id        String   @id @default(cuid())
+  projectId String
+  name      String
+  amount    Float
+  category  String   @default("MATERIAL") // MATERIAL, LABOR, TRANSPORT, OTHER
+  date      DateTime @default(now())
+  note      String?
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
