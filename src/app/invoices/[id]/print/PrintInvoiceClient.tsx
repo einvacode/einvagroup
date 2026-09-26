@@ -86,7 +86,7 @@ export default function PrintInvoiceClient({ invoice, company }: { invoice: any;
             />
           )}
           <div style={{ fontWeight: 'bold', fontSize: '14pt', letterSpacing: '2px' }}>
-            {company?.name?.toUpperCase() || 'PERUSAHAAN ANDA'}
+            {(company?.name === 'Einva Group' ? 'PT EINVA INTI DATA' : company?.name)?.toUpperCase() || 'PERUSAHAAN ANDA'}
           </div>
           {company?.address && <div style={{ fontSize: '10pt' }}>{company.address}</div>}
           {(company?.phone || company?.email) && (
@@ -236,7 +236,7 @@ export default function PrintInvoiceClient({ invoice, company }: { invoice: any;
           <div style={{ textAlign: 'center', width: '40%' }}>
             <div>Hormat Kami,</div>
             <div style={{ marginTop: '50px' }}>___________________</div>
-            <div>{company?.name || 'Perusahaan'}</div>
+            <div>{company?.name === 'Einva Group' ? 'PT EINVA INTI DATA' : (company?.name || 'Perusahaan')}</div>
           </div>
           <div style={{ textAlign: 'center', width: '40%' }}>
             <div>Penerima,</div>

@@ -77,7 +77,9 @@ export default function PrintQuotationClient({ quotation, company }: { quotation
             <div style={{ fontSize: '10pt' }}>Berlaku Hingga: {quotation.validUntil ? new Date(quotation.validUntil).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) : '-'}</div>
           </div>
           <div className="text-right">
-            <h2 style={{ margin: '0 0 5px 0', fontSize: '16px' }}>{company?.name || 'PERUSAHAAN ANDA'}</h2>
+            <h2 style={{ margin: '0 0 5px 0', fontSize: '16px' }}>
+              {company?.name === 'Einva Group' ? 'PT EINVA INTI DATA' : (company?.name || 'PERUSAHAAN ANDA')}
+            </h2>
             <div style={{ fontSize: '10pt' }}>{company?.address || ''}</div>
             <div style={{ fontSize: '10pt' }}>{company?.city || ''}</div>
             {company?.phone && <div style={{ fontSize: '10pt' }}>Telp: {company.phone}</div>}
@@ -169,7 +171,7 @@ export default function PrintQuotationClient({ quotation, company }: { quotation
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '40px' }}>
           <div className="text-center" style={{ width: '250px' }}>
             <div style={{ marginBottom: '80px' }}>Hormat kami,</div>
-            <div className="font-bold">{company?.name || 'Perusahaan'}</div>
+            <div className="font-bold">{company?.name === 'Einva Group' ? 'PT EINVA INTI DATA' : (company?.name || 'Perusahaan')}</div>
             <div style={{ color: '#4b5563', fontSize: '10pt' }}>{company?.directorName || 'Direktur Utama'}</div>
             <div style={{ color: '#4b5563', fontSize: '10pt' }}>{company?.bankHolder || ''}</div>
           </div>

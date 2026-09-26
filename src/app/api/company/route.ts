@@ -46,9 +46,18 @@ const defaultCompanyProfile = {
 };
 
 async function ensureCompanyProfile() {
-  const existing = await prisma.companyProfile.findFirst();
+  let existing = await prisma.companyProfile.findFirst();
 
-  if (existing) return existing;
+  if (existing) {
+    // Auto-heal the old default "Einva Group" in the user's production DB
+    if (existing.name === "Einva Group") {
+      existing = await prisma.companyProfile.update({
+        where: { id: existing.id },
+        data: { name: "PT EINVA INTI DATA" }
+      });
+    }
+    return existing;
+  }
 
   return prisma.companyProfile.create({
     data: defaultCompanyProfile,
