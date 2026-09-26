@@ -13,7 +13,6 @@ type SelectContextValue = {
   open: boolean
   selectedLabel?: string
   setOpen: (open: boolean) => void
-  setSelectedLabel: (label: string | undefined) => void
   onValueChange?: (value: string, label?: string) => void
 }
 
@@ -29,7 +28,6 @@ function getNodeText(children: React.ReactNode): string {
 export function Select({ className, children, value, defaultValue, onValueChange, ...props }: SelectProps) {
   const [open, setOpen] = React.useState(false)
   const [internalValue, setInternalValue] = React.useState(defaultValue ?? "")
-  const [selectedLabel, setSelectedLabel] = React.useState<string | undefined>(undefined)
   const containerRef = React.useRef<HTMLDivElement | null>(null)
 
   const optionMap = React.useMemo<Record<string, string>>(() => {
@@ -58,6 +56,8 @@ export function Select({ className, children, value, defaultValue, onValueChange
   const isControlled = value !== undefined
   const currentValue = isControlled ? value : internalValue
 
+  const selectedLabel = currentValue ? (optionMap[currentValue] ?? currentValue) : undefined
+
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -69,28 +69,16 @@ export function Select({ className, children, value, defaultValue, onValueChange
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  React.useEffect(() => {
-    if (!currentValue) {
-      setSelectedLabel(undefined)
-      return
-    }
-
-    const nextLabel = optionMap[currentValue] ?? currentValue
-    setSelectedLabel((prev) => (prev === nextLabel ? prev : nextLabel))
-  }, [currentValue, optionMap])
-
   const handleValueChange = React.useCallback(
-    (nextValue: string, nextLabel?: string) => {
+    (nextValue: string) => {
       if (!isControlled) {
         setInternalValue(nextValue)
       }
 
-      const resolvedLabel = nextLabel ?? optionMap[nextValue] ?? nextValue
-      setSelectedLabel((prev) => (prev === resolvedLabel ? prev : resolvedLabel))
       onValueChange?.(nextValue)
       setOpen(false)
     },
-    [isControlled, onValueChange, optionMap],
+    [isControlled, onValueChange],
   )
 
   const contextValue = React.useMemo<SelectContextValue>(
@@ -99,7 +87,6 @@ export function Select({ className, children, value, defaultValue, onValueChange
       open,
       selectedLabel,
       setOpen,
-      setSelectedLabel,
       onValueChange: handleValueChange,
     }),
     [currentValue, open, selectedLabel, handleValueChange],
@@ -171,6 +158,7 @@ export function SelectItem({
   return (
     <div
       role="option"
+      aria-selected={context?.value === resolvedValue}
       tabIndex={0}
       className={cn("cursor-pointer px-3 py-2.5 text-sm text-slate-700 transition hover:bg-slate-50 hover:text-slate-900", className)}
       onClick={() => {

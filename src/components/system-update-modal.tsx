@@ -108,16 +108,17 @@ export function SystemUpdateModal({ isOpen, onClose }: SystemUpdateModalProps) {
                 setErrorMessage(payload.message);
                 setLogs((prev) => [...prev, `\n❌ [ERROR] ${payload.message}\n`]);
               }
-            } catch (e) {
+            } catch {
               setLogs((prev) => [...prev, match[1]]);
             }
           }
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
       setStatus("error");
-      setErrorMessage(err.message || "Gagal menghubungi server");
-      setLogs((prev) => [...prev, `\n❌ [ERROR] ${err.message || "Gagal menghubungi server"}\n`]);
+      setErrorMessage(error.message || "Gagal menghubungi server");
+      setLogs((prev) => [...prev, `\n❌ [ERROR] ${error.message || "Gagal menghubungi server"}\n`]);
     }
   };
 
@@ -256,7 +257,7 @@ export function SystemUpdateModal({ isOpen, onClose }: SystemUpdateModalProps) {
               className="h-56 w-full overflow-y-auto rounded-2xl bg-slate-950 p-4 font-mono text-[11px] leading-relaxed text-emerald-400 border border-slate-800 shadow-inner select-text"
             >
               {logs.length === 0 ? (
-                <span className="text-slate-600 italic">Klik tombol "Mulai Pembaruan" untuk memulai...</span>
+                <span className="text-slate-600 italic">Klik tombol &quot;Mulai Pembaruan&quot; untuk memulai...</span>
               ) : (
                 logs.map((log, idx) => (
                   <span key={idx} className="whitespace-pre-wrap">

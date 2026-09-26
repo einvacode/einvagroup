@@ -1,14 +1,14 @@
 import * as React from "react"
-import { Controller, FormProvider, useFormContext, type ControllerProps, type FieldPath, type FieldValues } from "react-hook-form"
+import { Controller, FormProvider, useFormContext, type ControllerProps, type FieldPath, type FieldValues, type UseFormReturn } from "react-hook-form"
 
 import { cn } from "@/lib/utils"
 
 type FormProps<TFieldValues extends FieldValues> = {
   children: React.ReactNode
-} & Record<string, any>
+} & UseFormReturn<TFieldValues>
 
 export function Form<TFieldValues extends FieldValues>({ children, ...formMethods }: FormProps<TFieldValues>) {
-  return <FormProvider {...(formMethods as any)}>{children}</FormProvider>
+  return <FormProvider {...formMethods}>{children}</FormProvider>
 }
 
 export function FormField<TFieldValues extends FieldValues, TName extends FieldPath<TFieldValues>>({
