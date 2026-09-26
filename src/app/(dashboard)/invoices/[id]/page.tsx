@@ -243,13 +243,20 @@ export default function InvoiceDetailPage() {
             </div>
           </div>
 
-          {/* Notes */}
-          {(invoice.notes || companyProfile?.bankInfo || companyProfile?.notes) && (
-            <div className="border-t pt-4 text-sm text-slate-600">
-              <p className="font-semibold text-slate-800 mb-1">Informasi Pembayaran:</p>
-              <p className="whitespace-pre-wrap">{invoice.notes || companyProfile?.bankInfo || companyProfile?.notes}</p>
-            </div>
-          )}
+          {/* Notes & Bank Info */}
+          {(() => {
+            const bankInfo = companyProfile?.bankName
+              ? `Rekening Pembayaran:\n${companyProfile.bankName} - ${companyProfile.bankAccount}\na.n. ${companyProfile.bankHolder}`
+              : null;
+            const info = invoice.notes || bankInfo || companyProfile?.notes;
+            if (!info) return null;
+            return (
+              <div className="border-t pt-4 text-sm text-slate-600">
+                <p className="font-semibold text-slate-800 mb-1">Informasi Pembayaran:</p>
+                <p className="whitespace-pre-wrap">{info}</p>
+              </div>
+            );
+          })()}
 
           {/* Payment history */}
           {invoice.payments && invoice.payments.length > 0 && (
@@ -395,12 +402,19 @@ export default function InvoiceDetailPage() {
         <pre style={{ margin: '6px 0', fontFamily: 'inherit' }}>{sep('=', 70)}</pre>
 
         {/* Payment info / notes */}
-        {(invoice.notes || companyProfile?.bankInfo || companyProfile?.notes) && (
-          <div style={{ fontSize: '9pt', marginBottom: '6px', whiteSpace: 'pre-wrap' }}>
-            <strong>Informasi Pembayaran:</strong>{'\n'}
-            {invoice.notes || companyProfile?.bankInfo || companyProfile?.notes}
-          </div>
-        )}
+        {(() => {
+          const bankInfo = companyProfile?.bankName
+            ? `Rekening Pembayaran:\n${companyProfile.bankName} - ${companyProfile.bankAccount}\na.n. ${companyProfile.bankHolder}`
+            : null;
+          const info = invoice.notes || bankInfo || companyProfile?.notes;
+          if (!info) return null;
+          return (
+            <div style={{ fontSize: '9pt', marginBottom: '6px', whiteSpace: 'pre-wrap' }}>
+              <strong>Informasi Pembayaran:</strong>{'\n'}
+              {info}
+            </div>
+          );
+        })()}
 
         {/* Payment history */}
         {invoice.payments && invoice.payments.length > 0 && (
