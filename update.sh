@@ -28,12 +28,21 @@ if [ ! -f package.json ]; then
   fail "package.json tidak ditemukan di $APP_DIR"
 fi
 
-# Backup DB before git pull if present
+# Backup DB and uploaded files before git pull
+mkdir -p backups
+DB_BACKUP=""
+UPLOADS_BACKUP=""
+
 if [ -f "prisma/dev.db" ]; then
-  mkdir -p backups
-  backup_file="backups/dev_db_backup_$(date +%Y%m%d_%H%M%S).db"
-  cp "prisma/dev.db" "$backup_file"
-  log "${YELLOW}[INFO] Backup database dibuat: $backup_file${NC}"
+  DB_BACKUP="backups/dev_db_backup_$(date +%Y%m%d_%H%M%S).db"
+  cp "prisma/dev.db" "$DB_BACKUP"
+  log "${YELLOW}[INFO] Backup database dibuat: $DB_BACKUP${NC}"
+fi
+
+if [ -d "public/uploads" ]; then
+  UPLOADS_BACKUP="backups/uploads_backup_$(date +%Y%m%d_%H%M%S)"
+  cp -a "public/uploads" "$UPLOADS_BACKUP"
+  log "${YELLOW}[INFO] Backup file upload dibuat: $UPLOADS_BACKUP${NC}"
 fi
 
 # Update source code
@@ -48,6 +57,14 @@ if [ -d .git ]; then
   fi
 else
   log "${YELLOW}[INFO] Folder ini bukan repo Git; lewati pull${NC}"
+fi
+
+# Restore uploaded assets if they were backed up and the repo doesn't include them
+if [ -n "$UPLOADS_BACKUP" ] && [ -d "$UPLOADS_BACKUP" ]; then
+  mkdir -p public
+  rm -rf public/uploads
+  cp -a "$UPLOADS_BACKUP" public/uploads
+  log "${YELLOW}[INFO] File upload berhasil dikembalikan ke public/uploads${NC}"
 fi
 
 # Install dependencies with lockfile for reproducible builds
