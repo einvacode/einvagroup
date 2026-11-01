@@ -1,8 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 
-const emptyForm = {
+type UserRole = "ADMIN" | "MANAGER" | "STAFF";
+
+type UserRow = {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+};
+
+type UserForm = {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  role: UserRole;
+};
+
+const emptyForm: UserForm = {
   id: "",
   name: "",
   email: "",
@@ -11,27 +29,31 @@ const emptyForm = {
 };
 
 export default function UsersPage() {
-  const [users, setUsers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState(emptyForm);
+  const { data: session, status } = useSession();
+  const [users, setUsers] = useState<UserRow[]>([]);
+  const [form, setForm] = useState<UserForm>(emptyForm);
   const [saving, setSaving] = useState(false);
 
-  const fetchUsers = async () => {
-    try {
-      const res = await fetch("/api/users");
-      if (!res.ok) throw new Error("Failed to fetch users");
-      const data = await res.json();
-      setUsers(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const isAdmin = session?.user?.role === "ADMIN";
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    if (status !== "authenticated" || !isAdmin) {
+      return;
+    }
+
+    const loadUsers = async () => {
+      try {
+        const res = await fetch("/api/users");
+        if (!res.ok) throw new Error("Failed to fetch users");
+        const data = await res.json();
+        setUsers(Array.isArray(data) ? (data as UserRow[]) : []);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    void loadUsers();
+  }, [status, isAdmin]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -52,7 +74,11 @@ export default function UsersPage() {
       }
 
       setForm(emptyForm);
-      await fetchUsers();
+      const refreshRes = await fetch("/api/users");
+      if (refreshRes.ok) {
+        const data = await refreshRes.json();
+        setUsers(Array.isArray(data) ? (data as UserRow[]) : []);
+      }
     } catch (error) {
       alert(error instanceof Error ? error.message : "Gagal menyimpan user");
     } finally {
@@ -60,7 +86,7 @@ export default function UsersPage() {
     }
   };
 
-  const handleEdit = (user: any) => {
+  const handleEdit = (user: UserRow) => {
     setForm({
       id: user.id,
       name: user.name,
@@ -76,11 +102,28 @@ export default function UsersPage() {
     try {
       const res = await fetch(`/api/users?id=${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Gagal menghapus user");
-      await fetchUsers();
+      const refreshRes = await fetch("/api/users");
+      if (refreshRes.ok) {
+        const data = await refreshRes.json();
+        setUsers(Array.isArray(data) ? (data as UserRow[]) : []);
+      }
     } catch (error) {
       alert(error instanceof Error ? error.message : "Gagal menghapus user");
     }
   };
+
+  if (status === "loading") {
+    return <div className="text-sm text-slate-500">Memuat akses...</div>;
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-amber-900">
+        <h2 className="text-xl font-bold">Akses Terbatas</h2>
+        <p className="mt-2 text-sm">Hanya Administrator yang dapat mengelola pengguna.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -163,7 +206,7 @@ export default function UsersPage() {
         <div className="card-surface rounded-2xl p-6 shadow-sm">
           <h2 className="text-xl font-bold text-slate-900">Daftar Pengguna</h2>
 
-          {loading ? (
+          {status === "loading" ? (
             <p className="mt-4 text-sm text-slate-500">Memuat data pengguna...</p>
           ) : users.length === 0 ? (
             <p className="mt-4 text-sm text-slate-500">Belum ada pengguna.</p>

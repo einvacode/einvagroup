@@ -50,7 +50,7 @@ export default function LoginPage() {
         router.push("/dashboard")
         router.refresh()
       }
-    } catch (err) {
+    } catch {
       setError("Terjadi kesalahan sistem")
     } finally {
       setIsLoading(false)
@@ -107,11 +107,8 @@ export default function LoginPage() {
             <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
               {isLoading ? "Memproses..." : "Masuk"}
             </Button>
-            <div className="text-center text-sm">
-              Belum punya akun?{" "}
-              <Link href="/register" className="text-blue-600 hover:underline">
-                Daftar disini
-              </Link>
+            <div className="text-center text-sm text-slate-500">
+              Pendaftaran akun hanya dapat dilakukan oleh Administrator.
             </div>
           </CardFooter>
         </form>

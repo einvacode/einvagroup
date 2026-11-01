@@ -14,10 +14,31 @@ const userSchema = z.object({
   role: z.enum(["ADMIN", "MANAGER", "STAFF"]).default("STAFF"),
 });
 
+type AuthSession = NonNullable<Awaited<ReturnType<typeof getServerSession>>>;
+
+type RequireAdminResult = {
+  error: NextResponse | null;
+  session: AuthSession | null;
+};
+
+async function requireAdminSession(): Promise<RequireAdminResult> {
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user) {
+    return { error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }), session: null };
+  }
+
+  const role = (session.user as { role?: string } | undefined)?.role;
+  if (role !== "ADMIN") {
+    return { error: NextResponse.json({ error: "Hanya administrator yang dapat mengelola pengguna." }, { status: 403 }), session: null };
+  }
+
+  return { error: null, session };
+}
+
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { error } = await requireAdminSession();
+    if (error) return error;
 
     const users = await prisma.user.findMany({
       orderBy: { createdAt: "desc" },
@@ -39,8 +60,8 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { error } = await requireAdminSession();
+    if (error) return error;
 
     const body = await req.json();
     const data = userSchema.parse(body);
@@ -79,8 +100,8 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { error } = await requireAdminSession();
+    if (error) return error;
 
     const body = await req.json();
     const data = userSchema.parse(body);
@@ -89,7 +110,12 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "User id diperlukan" }, { status: 400 });
     }
 
-    const updateData: any = {
+    const updateData: {
+      name: string;
+      email: string;
+      role: "ADMIN" | "MANAGER" | "STAFF";
+      password?: string;
+    } = {
       name: data.name,
       email: data.email,
       role: data.role,
@@ -122,8 +148,8 @@ export async function PUT(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { error } = await requireAdminSession();
+    if (error) return error;
 
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");

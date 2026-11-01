@@ -3,6 +3,7 @@ import { NextResponse } from "next/server"
 
 export default withAuth(
   function middleware(req) {
+    void req
     return NextResponse.next()
   },
   {
@@ -14,8 +15,7 @@ export default withAuth(
         if (
           pathname === "/" ||
           pathname.startsWith("/api/auth") ||
-          pathname === "/login" ||
-          pathname === "/register"
+          pathname === "/login"
         ) {
           return true
         }
