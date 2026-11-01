@@ -112,7 +112,7 @@ export default function UsersPage() {
     }
   };
 
-  if (status === "loading") {
+  if (status === "unauthenticated") {
     return <div className="text-sm text-slate-500">Memuat akses...</div>;
   }
 
@@ -172,7 +172,7 @@ export default function UsersPage() {
               <span className="text-sm font-medium text-slate-700">Role</span>
               <select
                 value={form.role}
-                onChange={(e) => setForm({ ...form, role: e.target.value })}
+                onChange={(e) => setForm({ ...form, role: e.target.value as UserRole })}
                 className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 outline-none transition focus:border-blue-500"
               >
                 <option value="ADMIN">Admin</option>
@@ -206,9 +206,7 @@ export default function UsersPage() {
         <div className="card-surface rounded-2xl p-6 shadow-sm">
           <h2 className="text-xl font-bold text-slate-900">Daftar Pengguna</h2>
 
-          {status === "loading" ? (
-            <p className="mt-4 text-sm text-slate-500">Memuat data pengguna...</p>
-          ) : users.length === 0 ? (
+          {users.length === 0 ? (
             <p className="mt-4 text-sm text-slate-500">Belum ada pengguna.</p>
           ) : (
             <div className="mt-5 space-y-3">
