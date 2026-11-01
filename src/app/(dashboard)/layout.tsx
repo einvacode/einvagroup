@@ -80,12 +80,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       >
         <div className="flex h-20 items-center justify-between border-b border-slate-800 px-6">
           <Link href="/dashboard" className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-700 bg-white shadow-lg shadow-blue-500/10">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-transparent shadow-none">
               <CompanyLogo
                 src={companyProfile?.logo || null}
                 name={companyProfile?.name || 'Sistem'}
-                className="h-full w-full object-contain p-1"
-                fallbackClassName="h-full w-full text-lg"
+                className="h-full w-full object-contain"
+                fallbackClassName="h-full w-full text-lg leading-none"
               />
             </div>
             <div className="flex flex-col">

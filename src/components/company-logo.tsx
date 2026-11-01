@@ -30,7 +30,13 @@ export function CompanyLogo({ src, name, className, fallbackClassName }: Company
   }
 
   return (
-    <div className={`flex items-center justify-center font-bold text-white bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-700 ${fallbackClassName || className}`}>
+    <div
+      className={[
+        'flex items-center justify-center font-black text-slate-900 select-none',
+        'bg-transparent text-inherit',
+        fallbackClassName || className || 'h-full w-full',
+      ].join(' ')}
+    >
       {name?.[0]?.toUpperCase() || 'E'}
     </div>
   );
