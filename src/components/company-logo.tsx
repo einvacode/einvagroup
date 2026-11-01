@@ -41,14 +41,16 @@ export function CompanyLogo({ src, name, className, fallbackClassName }: Company
   return (
     <div
       className={[
-        'flex items-center justify-center select-none text-slate-900',
-        'bg-transparent leading-none',
+        'flex items-center justify-center overflow-hidden rounded-xl border border-slate-200/80 bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-700 shadow-sm select-none',
+        'leading-none text-white',
         fallbackClassName || className || 'h-full w-full',
       ].join(' ')}
       aria-label={`Logo ${name || 'Perusahaan'}`}
     >
-      <span className="text-[9px] font-bold tracking-[0.28em] uppercase opacity-75">PT</span>
-      <span className="ml-1.5 text-base font-black tracking-[-0.08em] uppercase">{derivedBrand}</span>
+      <div className="flex flex-col items-center justify-center">
+        <span className="text-[7px] font-bold tracking-[0.28em] uppercase opacity-80">PT</span>
+        <span className="mt-0.5 text-[13px] font-black tracking-[-0.08em] uppercase">{derivedBrand}</span>
+      </div>
     </div>
   );
 }
