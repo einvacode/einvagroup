@@ -1,9 +1,14 @@
 #!/bin/bash
 # ==============================================================================
-# Script Update Einva Group untuk Proxmox LXC (Debian / Ubuntu)
+# Safe deploy script for Einva Group
+# - update via Git
+# - install deps with lockfile
+# - validate Prisma schema
+# - build before service restart
+# - verify app HTTP is responding
 # ==============================================================================
 
-set -e
+set -Eeuo pipefail
 
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -11,38 +16,82 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m'
 
+log() { printf '%b\n' "$1"; }
+fail() { log "${RED}[ERROR] $1${NC}"; exit 1; }
+
 APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$APP_DIR"
 
-echo -e "${BLUE}=== Memulai Pembaruan Einva Group ===${NC}"
+log "${BLUE}=== Memulai proses update Einva Group ===${NC}"
 
-# 1. Amankan file database lokal agar tidak konflik dengan Git
+if [ ! -f package.json ]; then
+  fail "package.json tidak ditemukan di $APP_DIR"
+fi
+
+# Backup DB before git pull if present
 if [ -f "prisma/dev.db" ]; then
-    mkdir -p backups
-    cp prisma/dev.db "backups/dev_db_backup_$(date +%Y%m%d_%H%M%S).db"
+  mkdir -p backups
+  backup_file="backups/dev_db_backup_$(date +%Y%m%d_%H%M%S).db"
+  cp "prisma/dev.db" "$backup_file"
+  log "${YELLOW}[INFO] Backup database dibuat: $backup_file${NC}"
 fi
 
-# 2. Pull Git (tanpa terhalang database SQLite)
-if [ -d ".git" ]; then
-    echo -e "${YELLOW}Menarik kode terbaru dari Git...${NC}"
-    git stash -- prisma/dev.db 2>/dev/null || true
-    git pull origin main || git pull || true
+# Update source code
+if [ -d .git ]; then
+  log "${YELLOW}[STEP 1/6] Pull kode terbaru dari Git...${NC}"
+  git fetch --all --prune
+  branch="$(git branch --show-current 2>/dev/null || true)"
+  if [ -n "$branch" ] && git rev-parse --verify "$branch" >/dev/null 2>&1; then
+    git pull --ff-only origin "$branch" || git pull --ff-only
+  else
+    git pull --ff-only origin main || git pull --ff-only
+  fi
+else
+  log "${YELLOW}[INFO] Folder ini bukan repo Git; lewati pull${NC}"
 fi
 
-# 3. Sinkronisasi skema database
-echo -e "${YELLOW}Sinkronisasi database Prisma...${NC}"
-npx prisma db push --skip-generate
+# Install dependencies with lockfile for reproducible builds
+log "${YELLOW}[STEP 2/6] Install dependency...${NC}"
+if [ -f package-lock.json ]; then
+  npm ci --no-audit --no-fund
+else
+  npm install --no-audit --no-fund
+fi
 
-# 4. Kompilasi Build Produksi
-echo -e "${YELLOW}Mengompilasi build Next.js...${NC}"
+# Prisma validation
+log "${YELLOW}[STEP 3/6] Generate Prisma client...${NC}"
+npx prisma generate
+
+log "${YELLOW}[STEP 4/6] Sinkronisasi database Prisma...${NC}"
+if [ -d prisma/migrations ] && [ "$(ls -A prisma/migrations 2>/dev/null)" ]; then
+  npx prisma migrate deploy
+else
+  npx prisma db push --skip-generate
+fi
+
+# Build must succeed before restart
+log "${YELLOW}[STEP 5/6] Build produksi Next.js...${NC}"
 npm run build
 
-# 5. Restart service systemd
-echo -e "${YELLOW}Merestart service...${NC}"
-if systemctl list-unit-files | grep -q "einvagroup.service"; then
-    systemctl restart einvagroup
-elif systemctl list-unit-files | grep -q "projekerja.service"; then
-    systemctl restart projekerja
+# Restart app only after successful build
+log "${YELLOW}[STEP 6/6] Restart service systemd...${NC}"
+if systemctl list-unit-files --type=service | grep -q '^einvagroup.service'; then
+  systemctl restart einvagroup.service
+elif systemctl list-unit-files --type=service | grep -q '^projekerja.service'; then
+  systemctl restart projekerja.service
+else
+  fail "Service systemd tidak ditemukan. Periksa nama unit service di server."
 fi
 
-echo -e "${GREEN}=== Pembaruan Berhasil! Aplikasi Einva Group telah aktif kembali ===${NC}"
+systemctl is-active --quiet einvagroup.service || systemctl is-active --quiet projekerja.service || fail "Service tidak aktif setelah restart."
+
+log "${YELLOW}[INFO] Menunggu aplikasi siap...${NC}"
+for i in $(seq 1 20); do
+  if curl -fsS http://127.0.0.1:3000 >/dev/null 2>&1; then
+    log "${GREEN}=== Update selesai. Aplikasi merespons HTTP 200 di http://127.0.0.1:3000 ===${NC}"
+    exit 0
+  fi
+  sleep 2
+done
+
+fail "Aplikasi gagal merespons HTTP setelah restart. Cek log systemctl dan build."
