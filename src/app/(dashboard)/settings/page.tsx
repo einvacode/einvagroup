@@ -566,21 +566,21 @@ export default function CompanySettingsPage() {
             </div>
 
             {/* Upload Logo Perusahaan */}
-            <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-slate-50/70 p-5 md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-gradient-to-r from-slate-50 to-white p-5 md:flex-row md:items-center md:justify-between">
               <div className="flex items-center gap-4">
-                <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
+                <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-3xl border-2 border-dashed border-slate-300 bg-slate-100 shadow-sm ring-1 ring-slate-200">
                   {profile.logo ? (
-                    <img src={profile.logo} alt="Logo perusahaan" className="h-full w-full object-contain p-2" />
+                    <img src={profile.logo} alt="Logo perusahaan" className="h-full w-full object-contain bg-white p-2" />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-600 to-indigo-600 text-2xl font-black text-white">
+                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-700 text-3xl font-black text-white">
                       {profile.name?.slice(0, 1).toUpperCase() || "P"}
                     </div>
                   )}
                 </div>
                 <div>
                   <p className="text-sm font-bold text-slate-900">Logo Perusahaan</p>
-                  <p className="text-xs text-slate-500">
-                    Akan ditampilkan di header Web Portal, SPH PDF, dan Invoice resmi.
+                  <p className="text-xs leading-5 text-slate-500">
+                    Dipakai di header portal, SPH PDF, dan invoice resmi. Preview dibuat bersih dan tidak seperti elemen form.
                   </p>
                 </div>
               </div>
@@ -596,12 +596,12 @@ export default function CompanySettingsPage() {
                         await saveProfile(updated);
                       }
                     }}
-                    className="rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-100 transition cursor-pointer"
+                    className="rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs font-bold text-rose-600 transition hover:bg-rose-100"
                   >
                     Hapus Logo
                   </button>
                 )}
-                <label className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-bold text-white hover:bg-slate-800 transition cursor-pointer">
+                <label className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-slate-800">
                   <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
                   {uploadingLogo ? "Mengunggah..." : profile.logo ? "Ganti Logo" : "Upload Logo Baru"}
                 </label>
