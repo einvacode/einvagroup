@@ -274,12 +274,12 @@ export default async function LandingPage() {
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo & Identitas Perusahaan */}
           <Link href="/" className="flex items-center gap-3.5 group">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs transition group-hover:shadow-md">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-transparent shadow-none transition group-hover:scale-[1.02]">
               <CompanyLogo
                 src={companyLogo}
                 name={company.name || 'Sistem'}
-                className="h-full w-full object-contain p-1"
-                fallbackClassName="h-full w-full text-lg"
+                className="h-full w-full object-contain"
+                fallbackClassName="h-full w-full text-lg rounded-lg"
               />
             </div>
             <div>
